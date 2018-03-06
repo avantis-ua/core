@@ -72,7 +72,7 @@ class Data implements DataInterface
     {
         $this->_data[$key] = $value;
     }
-	
+    
     /**
      * Set a value to a given path or an array of paths and values
      *
@@ -146,7 +146,7 @@ class Data implements DataInterface
 
         return $array;
     }
-	
+    
     /**
      * Add a value or an array of values to path
      *
@@ -189,7 +189,7 @@ class Data implements DataInterface
             }
         }
     }
-	
+    
     /**
      * Get a value from a path or all the stored values and remove them
      *
@@ -259,7 +259,7 @@ class Data implements DataInterface
     {
         return array_key_exists($key, $this->_data);
     }
-	
+    
     /**
      * Check if a path exists
      *
@@ -297,7 +297,7 @@ class Data implements DataInterface
 
         return array_key_exists($key, $array);
     }
-	
+    
     /**
      * Delete a path or an array of paths
      *
@@ -533,12 +533,12 @@ class Data implements DataInterface
     public function __unset($key)
     {
         $this->deleteData($key);
-		//unset($this->_data[$key]);
+        //unset($this->_data[$key]);
     }
 
      /*************************************
      * ArrayAccess interface
-	 * ArrayAccess Abstract Methods
+     * ArrayAccess Abstract Methods
      *************************************/
 
     /**
@@ -570,7 +570,7 @@ class Data implements DataInterface
     public function offsetExists($offset)
     {
         return $this->hasData($offset);
-		// return isset($this->_data[$offset]);
+        // return isset($this->_data[$offset]);
     }
 
     /**
@@ -583,7 +583,7 @@ class Data implements DataInterface
     public function offsetUnset($offset)
     {
         $this->deleteData($offset);
-		//if ($this->offsetExists($offset)) {
+        //if ($this->offsetExists($offset)) {
             //unset($this->_data[$offset]);
         //}
     }
@@ -599,7 +599,7 @@ class Data implements DataInterface
     public function offsetGet($offset)
     {
         return $this->getData($offset);
-		// return $this->offsetExists($offset) ? $this->_data[$offset] : null;
+        // return $this->offsetExists($offset) ? $this->_data[$offset] : null;
     }
     
     /**

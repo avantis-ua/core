@@ -17,7 +17,7 @@ interface AdapterInterface
 
     function __construct(Container $app);
 
-	//public function run(Request $request, Response $response, array $args = []);
+    //public function run(Request $request, Response $response, array $args = []);
 
 }
  

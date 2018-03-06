@@ -20,20 +20,20 @@ class ModelError extends Model implements ModelInterface
     public function __construct(Container $app)
     {
         parent::__construct($app);
-		// $this->connectContainer();
-		//$this->connectDatabases();
+        // $this->connectContainer();
+        //$this->connectDatabases();
     }
 
     public function get(Request $request, Response $response, array $args)
     {
         $response->withStatus(404);
-		return null;
+        return null;
     }
 
     public function post(Request $request, Response $response, array $args)
     {
         $response->withStatus(404);
-		return null;
+        return null;
     }
 
 }

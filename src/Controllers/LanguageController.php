@@ -18,7 +18,7 @@ class LanguageController extends Controller implements ControllerInterface
 
     public function get(Request $request, Response $response, array $args = [])
     {
-		$language = $this->languages->get($request);
+        $language = $this->languages->get($request);
         $langs = new $this->config['vendor']['detector']['language']();
 
         if (isset($this->session->language)) {
@@ -52,7 +52,7 @@ class LanguageController extends Controller implements ControllerInterface
     
     public function post(Request $request, Response $response, array $args = [])
     {
-		$language = $this->languages->get($request);
+        $language = $this->languages->get($request);
         $langs = new $this->config['vendor']['detector']['language']();
 
         if (isset($this->session->language)) {

@@ -18,25 +18,25 @@ class ModelSessionUser extends Model implements ModelInterface
 {
 
     /*  
-	public function __construct(Container $app)
+    public function __construct(Container $app)
     {
         parent::__construct($app);
-		$this->connectContainer();
-		$this->connectDatabases();
+        $this->connectContainer();
+        $this->connectDatabases();
     }
-	*/
+    */
 
     // Получаем данные из session
     public function get()
     {
 
-		$this->connectContainer();
+        $this->connectContainer();
 
-		// Определяем язык интерфейса пользователя
+        // Определяем язык интерфейса пользователя
         $langs = new $this->config['vendor']['detector']['language']();
         // Получаем массив данных из таблицы language на языке из $this->session->language
-		$lang = $this->session->language ?? $langs->getLanguage() ?? $this->config["settings"]["language"] ?? null;
-		$this->session->language = $lang;
+        $lang = $this->session->language ?? $langs->getLanguage() ?? $this->config["settings"]["language"] ?? null;
+        $this->session->language = $lang;
 
         if(!isset($this->session->post_id)) {
             $this->session->post_id = random_alias_id();
@@ -49,9 +49,9 @@ class ModelSessionUser extends Model implements ModelInterface
                 try {
                     $this->_data['role_id'] = $this->session->role_id ?? null;
                     $this->_data['user_id'] = $this->session->user_id ?? null;
-					// Читаем ключи
+                    // Читаем ключи
                     $session_key = $this->config['key']['session'];
-					$crypt = $this->config['vendor']['crypto']['crypt'];
+                    $crypt = $this->config['vendor']['crypto']['crypt'];
                     if (isset($this->session->iname)) {$this->_data['iname'] = $crypt::decrypt($this->session->iname, $session_key);}
                     if (isset($this->session->fname)) {$this->_data['fname'] = $crypt::decrypt($this->session->fname, $session_key);}
                     if (isset($this->session->phone)) {$this->_data['phone'] = $crypt::decrypt($this->session->phone, $session_key);}

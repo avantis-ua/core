@@ -116,10 +116,10 @@ class PluginPackages implements PluginInterface
         file_put_contents($vendor_dir."auto_require.json", $newArr);
         return true;
     }
-	
+    
     // Проверяем разрешен ли этот тип запроса для данного ресурса
     public function test($resource)
-	{
+    {
         // Если ресурс активен
         if (isset($this->config["settings"]["admin"]["resource"][$resource])) {
             if ($this->config["settings"]["admin"]["resource"][$resource] == true) {

@@ -12,13 +12,13 @@ namespace Pllano\Core\Models;
 class ModelTemplate
 {
 
-	private $template;
-	private $config;
+    private $template;
+    private $config;
 
-	public function __construct($config, $template)
+    public function __construct($config, $template)
     {
         $this->config = $config;
-		$this->template = $template;
+        $this->template = $template;
     }
 
     public function get()

@@ -15,26 +15,26 @@ class ModelLanguage
 {
     private $language = "en";
     private $cacheLifetime = 30*24*60*60;
-	private $cache;
-	private $routerDb;
-	private $_database;
-	private $_table;
-	private $db;
-	private $session;
+    private $cache;
+    private $routerDb;
+    private $_database;
+    private $_table;
+    private $db;
+    private $session;
 
     public function __construct($config, $routerDb, $cache, $session)
     {
         $this->config = $config;
-		$this->cache = $cache;
-		$this->session = $session;
-		$this->routerDb = $routerDb;
+        $this->cache = $cache;
+        $this->session = $session;
+        $this->routerDb = $routerDb;
         $this->_table = 'language';
     }
 
     // Ресурс language доступен только на чтение
     public function get(Request $request)
     {
-		$getParams = $request->getQueryParams();
+        $getParams = $request->getQueryParams();
         // Подключаем определение языка в браузере
         $langs = new $this->config['vendor']['detector']['language']();
         // Получаем массив данных из таблицы language на языке из $this->session->language
@@ -54,8 +54,8 @@ class ModelLanguage
         }
 
         $host = $request->getUri()->getHost();
-		
-		$data = null;
+        
+        $data = null;
 
         if ($this->cache->run($host.'/'.$this->_table.'/'.$this->language, $this->cacheLifetime) === null) {
 
@@ -70,7 +70,7 @@ class ModelLanguage
             $responseArr = $this->db->get($this->_table);
 
             if ($responseArr != null) {
-				$arr = [];
+                $arr = [];
                 foreach($responseArr['body']['items'] as $value)
                 {
                     $array = (array)$value['item'];
@@ -88,8 +88,8 @@ class ModelLanguage
         } else {
             $data = $this->cache->get() ?? [];
         }
-		
-		return $data;
+        
+        return $data;
  
     }
 
@@ -106,8 +106,8 @@ class ModelLanguage
     public function cacheLifetime($cacheLifetime = null)
     {
         if (isset($cacheLifetime)) {
-		    $this->cacheLifetime = $cacheLifetime;
-		}
+            $this->cacheLifetime = $cacheLifetime;
+        }
     }
 
 }

@@ -20,7 +20,7 @@ interface ModuleInterface extends ModelInterface
 
     public function get(Request $request);
 
-	public function post(Request $request);
+    public function post(Request $request);
 
 }
  

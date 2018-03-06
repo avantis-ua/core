@@ -26,20 +26,20 @@ class Model extends Data implements ModelInterface
     protected $logger;
     protected $template;
     protected $view;
-	protected $cache;
+    protected $cache;
 
     protected $siteId = 1;
 
     protected $pdo;
     protected $slim_pdo;
-	protected $routerDb;
+    protected $routerDb;
 
     protected $db;
     protected $_adapter = 'Apis'; // Pdo
     protected $_driver = '';
     protected $_database = 'mysql';
     protected $_table = 'abstract';
-	protected $_resource = 'abstract';
+    protected $_resource = 'abstract';
     protected $_idField = 'id';
     protected $_fieldMap = [];
     protected $_lastQuery = null;
@@ -47,8 +47,8 @@ class Model extends Data implements ModelInterface
     public function __construct(Container $app)
     {
         $this->app = $app;
-		$this->config = $this->app->get('config');
-		parent::__construct([]);
+        $this->config = $this->app->get('config');
+        parent::__construct([]);
     }
 
     public function connectContainer()
@@ -60,14 +60,14 @@ class Model extends Data implements ModelInterface
         $this->logger = $this->app->get('logger');
         $this->template = $this->app->get('template');
         $this->view = $this->app->get('view');
-		$this->cache = $this->app->get('cache');
+        $this->cache = $this->app->get('cache');
         $this->siteId = $this->app->get('site_id');
     }
 
     public function connectDatabases()
     {
-		$this->routerDb = $this->app->get('routerDb');
-		$this->routerDb->setConfig($this->config, $this->_adapter, $this->_driver);
+        $this->routerDb = $this->app->get('routerDb');
+        $this->routerDb->setConfig($this->config, $this->_adapter, $this->_driver);
         $this->_database = $this->routerDb->ping($this->_table);
         $this->db = $this->routerDb->run($this->_database);
 
@@ -75,17 +75,17 @@ class Model extends Data implements ModelInterface
 
     public function connectRouterDb()
     {
-		$this->connectDatabases();
+        $this->connectDatabases();
     }
 
     public function connectPdo()
     {
-		$this->pdo = $this->app->get('pdo');
+        $this->pdo = $this->app->get('pdo');
     }
 
     public function connectSlimPdo()
     {
-		$this->slim_pdo = $this->app->get('slim_pdo');
+        $this->slim_pdo = $this->app->get('slim_pdo');
     }
 
     /*************************************
@@ -96,19 +96,19 @@ class Model extends Data implements ModelInterface
     public function select()
     {
         $this->connectRouterDb();
-		return $this->db->select()->from($this->_table);
+        return $this->db->select()->from($this->_table);
     }
 
     public function query($query)
     {
-		return $this->select()->query($query)->fetchAll();
+        return $this->select()->query($query)->fetchAll();
     }
 
     public function getList($filters = [], $joinTables = null, $orderBy = null, $count = null, $offset = null) // Нужно тестить
     {
         $this->connectDatabases();
 
-		$r = [];
+        $r = [];
         $select = $this->select();
         if (isset($joinTables)) {
             throw new \Exception("::joinTables not implemented yet!");
@@ -143,7 +143,7 @@ class Model extends Data implements ModelInterface
 
         $this->_lastQuery = $select->__toString();
 
-		$rows = $this->db->query($select)->fetchAll();
+        $rows = $this->db->query($select)->fetchAll();
         if(is_array($rows))
         {
             foreach($rows as $row)
@@ -162,8 +162,8 @@ class Model extends Data implements ModelInterface
     public function getOne($id = null) // Нужно тестить
     {
         $this->connectDatabases();
-		
-		$select = $this->select();
+        
+        $select = $this->select();
         if (isset($id)) {
             if(is_array($id)) 
             {
@@ -182,7 +182,7 @@ class Model extends Data implements ModelInterface
 
         //$this->_lastQuery = $select->__toString();
 
-		$rows = $this->db->query($select)->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $this->db->query($select)->fetchAll(PDO::FETCH_ASSOC);
 
         $r = false;
         if(is_array($rows)) {
@@ -197,7 +197,7 @@ class Model extends Data implements ModelInterface
     public function getIdByAlias($alias)
     {
         $this->connectDatabases();
-		$query = [
+        $query = [
             "alias" => $alias,
             "site_id" => $this->siteId
         ];
@@ -210,7 +210,7 @@ class Model extends Data implements ModelInterface
     public function save() // Нужно тестить
     {
         $this->connectDatabases();
-		$current_date = $this->selectDate();
+        $current_date = $this->selectDate();
         $this->_data['modified'] = $current_date;
         $this->_data['visited'] = $current_date;
         if(!$this->hasId())
@@ -233,7 +233,7 @@ class Model extends Data implements ModelInterface
     public function delete() // Ok
     {
         $this->connectDatabases();
-		if(!$this->hasId()) throw new \Exception("::Trying to remove nonexistent property!");
+        if(!$this->hasId()) throw new \Exception("::Trying to remove nonexistent property!");
         $this->db->delete()
                  ->from($this->_table)
                  ->where($this->_idField, '=', $this->getId());
@@ -243,7 +243,7 @@ class Model extends Data implements ModelInterface
     public function countIt($table, $whereState) // Ok
     {
         $this->connectDatabases();
-		$select = 'SELECT COUNT(*) AS `num` FROM `'.$table.'` WHERE '. $whereState;
+        $select = 'SELECT COUNT(*) AS `num` FROM `'.$table.'` WHERE '. $whereState;
         $row = $this->db->query($select)->fetch();
         return $row['num'];
     }
@@ -252,7 +252,7 @@ class Model extends Data implements ModelInterface
     {
         if (isset($table)) {
              $this->connectDatabases();
-			 $this->_fieldMap = $this->db->fieldMap($table);
+             $this->_fieldMap = $this->db->fieldMap($table);
         }
     }
 
@@ -261,7 +261,7 @@ class Model extends Data implements ModelInterface
         $fieldMap = null;
         if (isset($table)) {
              $this->connectDatabases();
-			 $fieldMap = $this->db->fieldMap($table);
+             $fieldMap = $this->db->fieldMap($table);
         }
         return $fieldMap;
     }
@@ -290,7 +290,7 @@ class Model extends Data implements ModelInterface
         if($this->_table !== 'abstract')
         {
             $this->connectDatabases();
-			$this->_fieldMap = $this->db->fieldMap($this->_table);
+            $this->_fieldMap = $this->db->fieldMap($this->_table);
         }
     }
 
@@ -316,7 +316,7 @@ class Model extends Data implements ModelInterface
     static public function selectDate($minutes = null) // Ok
     {
         $this->connectDatabases();
-		if (isset($minutes)) {
+        if (isset($minutes)) {
             $query = "SELECT DATE_FORMAT(NOW() + INTERVAL '".intval($minutes)."' MINUTE, '%Y-%m-%d %H:%i:%s') AS selected_date";
         } else {
             $query = "SELECT DATE_FORMAT(NOW(), '%Y-%m-%d %H:%i:%s') AS selected_date";
@@ -328,8 +328,8 @@ class Model extends Data implements ModelInterface
     // Строим запрос для списка или выборки одного объекта
     protected function _buildSelectQuery() // Ok
     {
-		$this->connectDatabases();
-		return $this->db->select()->from($this->_table);
+        $this->connectDatabases();
+        return $this->db->select()->from($this->_table);
     }
 
 }

@@ -18,7 +18,7 @@ class Controller
     protected $time_start;
     protected $package = [];
     protected $session;
-	protected $cache;
+    protected $cache;
     protected $languages;
     protected $logger;
     protected $template;
@@ -36,12 +36,12 @@ class Controller
         $this->time_start = $this->app->get('time_start');
         $this->package = $this->app->get('package');
         $this->session = $this->app->get('session');
-		$this->cache = $this->app->get('cache');
+        $this->cache = $this->app->get('cache');
         $this->languages = $this->app->get('languages');
         $this->logger = $this->app->get('logger');
         $this->template = $this->app->get('template');
         $this->view = $this->app->get('view');
-		
+        
     }
 
 }

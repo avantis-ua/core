@@ -25,15 +25,15 @@ class Controllers extends Controller implements ControllerInterface
 
     public function get(Request $request, Response $response, array $args = [])
     {
-        // $getScheme			= $request->getUri()->getScheme(); // Работает
-        // $getQuery			= $request->getUri()->getQuery(); // Работает
-        // $getHost				= $request->getUri()->getHost(); // Работает
-        // $getPath				= $request->getUri()->getPath(); // Работает
-		// $getParams			= $request->getQueryParams(); // Работает
-        // $getMethod			= $request->getMethod();
-        // $getParsedBody		= $request->getParsedBody();
+        // $getScheme            = $request->getUri()->getScheme(); // Работает
+        // $getQuery            = $request->getUri()->getQuery(); // Работает
+        // $getHost                = $request->getUri()->getHost(); // Работает
+        // $getPath                = $request->getUri()->getPath(); // Работает
+        // $getParams            = $request->getQueryParams(); // Работает
+        // $getMethod            = $request->getMethod();
+        // $getParsedBody        = $request->getParsedBody();
 
-		$time_start = microtime_float();
+        $time_start = microtime_float();
         $this->query = $request->getMethod();
 
         // Передаем данные Hooks для обработки ожидающим классам
@@ -62,7 +62,7 @@ class Controllers extends Controller implements ControllerInterface
 
             // Генерируем токен. Читаем ключ. Записываем токен в сессию.
             // Default Defuse\Crypto\Crypto
-			$crypt = $this->config['vendor']['crypto']['crypt'];
+            $crypt = $this->config['vendor']['crypto']['crypt'];
             $this->session->token = $crypt::encrypt(random_token(), $this->config['key']['token']);
 
             $language = $this->languages->get($request);
@@ -139,7 +139,7 @@ class Controllers extends Controller implements ControllerInterface
                 $data = array_replace_recursive($userArr, $dataArr);
             } else {
 
-				$sessionTemp = new $this->config['vendor']['session']['session']("_temp");
+                $sessionTemp = new $this->config['vendor']['session']['session']("_temp");
                 $render = "index.html";
                 // Если ключа доступа у нет, значит сайт еще не активирован
                 $content = '';
@@ -193,11 +193,11 @@ class Controllers extends Controller implements ControllerInterface
             ]);
         }
 
-		if (!isset($data['content'])) {
-		    $response->withStatus(404);
-		} else {
-		    $response->withStatus(200);
-		}
+        if (!isset($data['content'])) {
+            $response->withStatus(404);
+        } else {
+            $response->withStatus(200);
+        }
 
         if ($this->config['settings']["install"]["status"] != null) {
             return $response->write($this->view->render($hook->render(), $hook->view()));
@@ -282,7 +282,7 @@ class Controllers extends Controller implements ControllerInterface
     {
         $view = '';
 
-		$host = $request->getUri()->getHost();
+        $host = $request->getUri()->getHost();
         $path = '';
         if($request->getUri()->getPath() != '/') {
             $path = $request->getUri()->getPath();
@@ -332,8 +332,8 @@ class Controllers extends Controller implements ControllerInterface
                 "robots" => "index, follow",
                 "render" => "index.phtml",
                 "caching" => $this->config['cache']['driver'],
-				"caching_state" => $this->config['cache']['state'],
-				"cache_lifetime" => $this->config['cache']['cache_lifetime']
+                "caching_state" => $this->config['cache']['state'],
+                "cache_lifetime" => $this->config['cache']['cache_lifetime']
             ];
             $data['h3'] = $request->getAttribute('resource') ?? null;
             $data['id'] = $request->getAttribute('id') ?? null;
@@ -357,8 +357,8 @@ class Controllers extends Controller implements ControllerInterface
     public function runApi(Request $request, Response $response, array $args)
     {
         $callback = [];
-		
-		$function = strtolower($request->getMethod());
+        
+        $function = strtolower($request->getMethod());
 
         // Models Directory /vendor/app/Models/
         // AutoRequire\Autoloader - Automatically registers a namespace \App in /vendor/app/
@@ -374,7 +374,7 @@ class Controllers extends Controller implements ControllerInterface
     {
         $callback = [];
 
-		// $getParsedBody = $request->getParsedBody();
+        // $getParsedBody = $request->getParsedBody();
         
         // Models Directory /vendor/app/models/
         // AutoRequire\Autoloader - Automatically registers a namespace in /vendor/app/

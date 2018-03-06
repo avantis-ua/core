@@ -20,7 +20,7 @@ class ModelSecurity extends Model implements ModelInterface
     public function __construct(Container $app)
     {
         parent::__construct($app);
-		$this->connectContainer();
+        $this->connectContainer();
     }
 
     // Сообщение об Атаке или подборе токена

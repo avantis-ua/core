@@ -20,8 +20,8 @@ class ModelApi extends Model implements ModelInterface
     public function __construct(Container $app)
     {
         parent::__construct($app);
-		$this->connectContainer();
-		$this->connectDatabases();
+        $this->connectContainer();
+        $this->connectDatabases();
     }
 
     public function get(Request $request, Response $response, array $args)

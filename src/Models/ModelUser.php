@@ -20,10 +20,10 @@ class ModelUser extends Model implements ModelInterface
     public function __construct(Container $app)
     {
         parent::__construct($app);
-		$this->connectContainer();
-		$this->connectDatabases();
+        $this->connectContainer();
+        $this->connectDatabases();
         $this->_table = 'user';
-		$this->_idField = 'id';
+        $this->_idField = 'id';
     }
 
     // Запускаем сессию пользоваетеля
@@ -34,7 +34,7 @@ class ModelUser extends Model implements ModelInterface
         $cookie_key = $this->config['key']['cookie'];
         $crypt = $this->config['vendor']['crypto']['crypt'];
         
-		$session_name = $this->config['settings']['session']['name'];
+        $session_name = $this->config['settings']['session']['name'];
         $get_cookie = get_cookie($session_name);
         if ($get_cookie != null) {
             try {
@@ -44,7 +44,7 @@ class ModelUser extends Model implements ModelInterface
             }
 
             if ($cookie != null) {
-				
+                
                 $responseArr = [];
                 // Отдаем роутеру RouterDb конфигурацию
                 $this->routerDb->setConfig([], 'Apis');
@@ -73,9 +73,9 @@ class ModelUser extends Model implements ModelInterface
                             $this->session->authorize = 1;
                             $this->session->role_id = $user["role_id"];
                             if($this->session->role_id == 100) {
-								if(!isset($this->session->admin_uri)) {
+                                if(!isset($this->session->admin_uri)) {
                                     $this->session->admin_uri = random_alias_id();
-								}
+                                }
                             }
                             $this->session->user_id = $user["id"];
                             $this->session->iname = $crypt::encrypt($user["iname"], $session_key);

@@ -16,33 +16,33 @@ interface DataInterface extends \ArrayAccess, \Countable
     * _DATA
     *************************************/
     public function createData(array $data = []);
-	public function addData($key, $value = null, $pop = false);
+    public function addData($key, $value = null, $pop = false);
     public function hasId();
     public function getId();
     public function setId($newId = null);
-	public function setData($key, $value = null);
-	public function setDataOne($key, $value);
+    public function setData($key, $value = null);
+    public function setDataOne($key, $value);
     public function getData($key, $default = null);
-	public function getDataOne($key, $default = null);
-	public function pullData($key = null, $default = null);
+    public function getDataOne($key, $default = null);
+    public function pullData($key = null, $default = null);
     public function replaceData(array $data = []);
     public function allData();
-	public function keysData();
-	public function hasDataOne($key);
+    public function keysData();
+    public function hasDataOne($key);
     public function hasData($key);
-	public function existsData($array, $key);
-	public function deleteData($key);
-	public function deleteDataOne($key);
+    public function existsData($array, $key);
+    public function deleteData($key);
+    public function deleteDataOne($key);
     public function removeData($key);
-	public function clearDataAll();
+    public function clearDataAll();
     public function clearData($key = null);
-	public function sortData($key = null);
-	public function sortRecursiveData($key = null, $array = null);
-	public function sortArrayData($array);
-	public function accessibleData($value);
-	public function isAssocData($array = null);
-	public function setArrayData($array);
-	public function setReferenceData(&$array);
+    public function sortData($key = null);
+    public function sortRecursiveData($key = null, $array = null);
+    public function sortArrayData($array);
+    public function accessibleData($value);
+    public function isAssocData($array = null);
+    public function setArrayData($array);
+    public function setReferenceData(&$array);
 
     /*************************************
     * ArrayAccess Interface

@@ -22,7 +22,7 @@ class PluginResources implements PluginInterface
 
     // Проверяем разрешен ли этот тип запроса для данного ресурса
     public function test_query($resource)
-	{
+    {
         // Если ресурс активен
         if (isset($this->config["settings"]["admin"]["resource"][$resource])) {
             if ($this->config["settings"]["admin"]["resource"][$resource] == true) {

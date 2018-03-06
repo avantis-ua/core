@@ -16,23 +16,23 @@ use Pllano\Core\Interfaces\ModuleInterface;
 class Module extends Model implements ModuleInterface
 {
 
-	protected $block;
+    protected $block;
     protected $route;
     protected $modulKey;
-	protected $modulVal;
+    protected $modulVal;
 
-	public function __construct(Container $app, string $route = null, string $block = null, string $modulKey = null, array $modulVal = [])
+    public function __construct(Container $app, string $route = null, string $block = null, string $modulKey = null, array $modulVal = [])
     {
-		parent::__construct($app);
+        parent::__construct($app);
         $this->block = $block;
         $this->route = $route;
-		$this->modulKey = $modulKey;
-		$this->modulVal = $modulVal;
+        $this->modulKey = $modulKey;
+        $this->modulVal = $modulVal;
     }
 
     public function get(Request $request){}
 
-	public function post(Request $request){}
+    public function post(Request $request){}
 
 }
  

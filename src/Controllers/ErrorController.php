@@ -15,8 +15,8 @@ use Pllano\Core\Interfaces\ControllerInterface;
 use Pllano\Core\Controller;
 use Pllano\Core\Models\{
     ModelSessionUser, 
-	ModelMenu, 
-	ModelSite
+    ModelMenu, 
+    ModelSite
 };
 
 class ErrorController extends Controller implements ControllerInterface
@@ -96,8 +96,8 @@ class ErrorController extends Controller implements ControllerInterface
             "menu" => $menu,
             "content" => $content
         ];
-		
-		$response->withStatus(404);
+        
+        $response->withStatus(404);
 
         return $response->write($this->view->render($response, $render, $data));
     }

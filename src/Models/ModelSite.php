@@ -17,17 +17,17 @@ use Pllano\Core\Model;
 class ModelSite extends Model implements ModelInterface
 {
 
-	protected $templates;
-	private $cache_lifetime = 30*24*60*60;
+    protected $templates;
+    private $cache_lifetime = 30*24*60*60;
 
-	public function __construct(Container $app)
+    public function __construct(Container $app)
     {
         parent::__construct($app);
-		$this->connectContainer();
-		$this->connectDatabases();
+        $this->connectContainer();
+        $this->connectDatabases();
         $this->_table = 'site';
-		$this->_idField = 'site_id';
-		$this->templates = $this->config["template"]["front_end"]["themes"]["template"];
+        $this->_idField = 'site_id';
+        $this->templates = $this->config["template"]["front_end"]["themes"]["template"];
     }
 
     public function get()
@@ -35,26 +35,26 @@ class ModelSite extends Model implements ModelInterface
         $cache_run = $this->cache->run($this->_table, $this->cache_lifetime);
         if ($cache_run === null) {
 
-			$responseArr = [];
-			// Отдаем роутеру RouterDb конфигурацию
-			$this->routerDb->setConfig([], 'Apis');
-			// Пингуем для ресурса указанную и доступную базу данных
-			$this->_database = $this->routerDb->ping($this->_table);
-			// Подключаемся к БД через выбранный Adapter: Sql, Pdo или Apis (По умолчанию Pdo)
-			$this->db = $this->routerDb->run($this->_database);
-			// Отправляем запрос к БД в формате адаптера. В этом случае Apis
-			$responseArr = $this->db->get($this->_table);
+            $responseArr = [];
+            // Отдаем роутеру RouterDb конфигурацию
+            $this->routerDb->setConfig([], 'Apis');
+            // Пингуем для ресурса указанную и доступную базу данных
+            $this->_database = $this->routerDb->ping($this->_table);
+            // Подключаемся к БД через выбранный Adapter: Sql, Pdo или Apis (По умолчанию Pdo)
+            $this->db = $this->routerDb->run($this->_database);
+            // Отправляем запрос к БД в формате адаптера. В этом случае Apis
+            $responseArr = $this->db->get($this->_table);
 
-			$site = null;
-			if(isset($responseArr["body"]["items"]["0"]["item"])) {
-			    if ($responseArr != null) {
-			        $site = $responseArr["body"]["items"]["0"]["item"];
-			    }
-			}
-			if ($this->cache->state() == 1) {
-			    $this->cache->set($site);
-			}
-			return $site;
+            $site = null;
+            if(isset($responseArr["body"]["items"]["0"]["item"])) {
+                if ($responseArr != null) {
+                    $site = $responseArr["body"]["items"]["0"]["item"];
+                }
+            }
+            if ($this->cache->state() == 1) {
+                $this->cache->set($site);
+            }
+            return $site;
 
         } else {
              return $this->cache->get();

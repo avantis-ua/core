@@ -109,7 +109,7 @@ class PluginFilter implements PluginInterface
         $currentPage = $this->offset + 1; // Страница
         $itemsPerPage = $this->limit; // Товаров на странице
         $neighbours = 4; // Колличество линков по обе стороны от активного
-        $pagination = new Pagination($totalItems, $currentPage, $itemsPerPage, $neighbours);
+        $pagination = new PluginPagination($totalItems, $currentPage, $itemsPerPage, $neighbours);
         $pages = $pagination->build(); // Contains associative array with a numbers of a pages
         $new_offset = $pagination->offset();
         $number_pages = intval($totalItems / $this->limit); // Вычисляем колличество страниц
@@ -164,7 +164,7 @@ class PluginFilter implements PluginInterface
         $currentPage = $this->offset + 1; // Страница
         $itemsPerPage = $this->limit; // Товаров на странице
         $neighbours = 4; // Колличество линков по обе стороны от активного
-        $pagination = new Pagination($totalItems, $currentPage, $itemsPerPage, $neighbours);
+        $pagination = new PluginPagination($totalItems, $currentPage, $itemsPerPage, $neighbours);
         $pages = $pagination->build(); // Contains associative array with a numbers of a pages
         $new_offset = $pagination->offset();
         $number_pages = intval($totalItems / $this->limit); // Вычисляем колличество страниц

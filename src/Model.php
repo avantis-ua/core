@@ -17,6 +17,7 @@ class Model extends Data implements ModelInterface
 {
 
     protected $app;
+	protected $data;
 
     protected $config = [];
     protected $time_start;
@@ -47,8 +48,8 @@ class Model extends Data implements ModelInterface
     public function __construct(Container $app)
     {
         $this->app = $app;
-        $this->config = $this->app->get('config');
-        parent::__construct([]);
+        $this->data = new Data([]);
+		$this->config = $this->app->get('config');
     }
 
     public function connectContainer()
@@ -61,15 +62,15 @@ class Model extends Data implements ModelInterface
         $this->template = $this->app->get('template');
         $this->view = $this->app->get('view');
         $this->cache = $this->app->get('cache');
-        $this->siteId = $this->app->get('site_id');
+        $this->siteId = $this->app->get('siteId');
     }
 
     public function connectDatabases()
     {
         $this->routerDb = $this->app->get('routerDb');
         $this->routerDb->setConfig($this->config, $this->_adapter, $this->_driver);
-        $this->_database = $this->routerDb->ping($this->_table);
-        $this->db = $this->routerDb->run($this->_database);
+        $this->database = $this->routerDb->ping($this->_table);
+        $this->db = $this->routerDb->run($this->database);
 
     }
 
@@ -202,8 +203,8 @@ class Model extends Data implements ModelInterface
             "site_id" => $this->siteId
         ];
         $id = null;
-        $this->_data = $this->db->get($this->_table, $query, $id, $this->_idField);
-        return $this->_data['id'] ?? null;
+        $this->data = $this->db->get($this->_table, $query, $id, $this->_idField);
+        return $this->data['id'] ?? null;
     }
 
     // Save
@@ -211,11 +212,11 @@ class Model extends Data implements ModelInterface
     {
         $this->connectDatabases();
         $current_date = $this->selectDate();
-        $this->_data['modified'] = $current_date;
-        $this->_data['visited'] = $current_date;
+        $this->data['modified'] = $current_date;
+        $this->data['visited'] = $current_date;
         if(!$this->hasId())
         {
-            $this->_data['created'] = $current_date;
+            $this->data['created'] = $current_date;
 
             $this->db->insert($this->toArray());
             

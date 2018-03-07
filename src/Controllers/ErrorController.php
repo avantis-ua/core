@@ -57,8 +57,7 @@ class ErrorController extends Controller implements ControllerInterface
         $session->token = $this->config['vendor']['crypto']['crypt']::encrypt($token, $token_key);
         // Контент по умолчанию
         $content = [];
-        $render = '';
-        
+
         $post_id = '/_';
         $admin_uri = '/_';
         if(!empty($session->admin_uri)) {
@@ -71,7 +70,7 @@ class ErrorController extends Controller implements ControllerInterface
         $site = new ModelSite($this->config);
         $site_config = $site->get();
         // Шаблон по умолчанию 404
-        $render = $this->template['layouts']['404'] ? $this->template['layouts']['404'] : '404.html';
+        $this->render = $this->template['layouts']['404'] ? $this->template['layouts']['404'] : '404.html';
 
         // Заголовки по умолчанию из конфигурации
         $headArr = explode(',', str_replace([" ", "'"], "", $this->config['settings']['seo']['head']));
@@ -82,7 +81,7 @@ class ErrorController extends Controller implements ControllerInterface
             $head = array_replace_recursive($head, $head_arr);
         }
 
-        $data = [
+        $this->_data = [
             "head" => $head,
             "routers" => $routers,
             "site" => $site_config,
@@ -99,7 +98,7 @@ class ErrorController extends Controller implements ControllerInterface
         
         $response->withStatus(404);
 
-        return $response->write($this->view->render($response, $render, $data));
+        return $response->write($this->view->render($response, $this->render, $this->_data));
     }
     
 }

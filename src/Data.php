@@ -480,6 +480,11 @@ class Data implements DataInterface
             $this->_data = &$array;
         }
     }
+	
+    public function __invoke()
+    {
+        return $this->_data;
+    }
 
      /*************************************
      * Magic Methods
@@ -491,10 +496,10 @@ class Data implements DataInterface
      * @param string The key data to retrieve
      * @access public
      */
-    public function &__get ($key)
+    public function &__get($key)
     {
-        // return $this->_data[$key] ?? null;
-        return $this->getData($key);
+        return $this->_data[$key];
+        //return $this->getData($key);
     }
 
     /**
@@ -506,8 +511,8 @@ class Data implements DataInterface
      */
     public function __set($key, $value = null)
     {
-        // $this->_data[$key] = $value;
-        $this->setData($key, $value);
+        $this->_data[$key] = $value;
+        // $this->setData($key, $value);
     }
 
     /**
@@ -518,10 +523,10 @@ class Data implements DataInterface
      * @return boolean
      * @abstracting ArrayAccess
      */
-    public function __isset ($key)
+    public function __isset($key)
     {
-        // return isset($this->_data[$key]);
-        return $this->hasData($key);
+        return isset($this->_data[$key]);
+        // return $this->hasData($key);
     }
 
     /**
@@ -532,8 +537,8 @@ class Data implements DataInterface
      */
     public function __unset($key)
     {
-        $this->deleteData($key);
-        //unset($this->_data[$key]);
+        //$this->deleteData($key);
+        unset($this->_data[$key]);
     }
 
      /*************************************
@@ -551,12 +556,12 @@ class Data implements DataInterface
      */
     public function offsetSet($offset, $value)
     {
-        $this->setData($offset, $value);
-        //if (is_null($offset)) {
-            //$this->_data[] = $value;
-        //} else {
-            //$this->_data[$offset] = $value;
-        //}
+        //$this->setData($offset, $value);
+        if (is_null($offset)) {
+            $this->_data[] = $value;
+        } else {
+            $this->_data[$offset] = $value;
+        }
     }
 
     /**
@@ -569,8 +574,8 @@ class Data implements DataInterface
      */
     public function offsetExists($offset)
     {
-        return $this->hasData($offset);
-        // return isset($this->_data[$offset]);
+        // return $this->hasData($offset);
+        return isset($this->_data[$offset]);
     }
 
     /**
@@ -582,10 +587,10 @@ class Data implements DataInterface
      */
     public function offsetUnset($offset)
     {
-        $this->deleteData($offset);
-        //if ($this->offsetExists($offset)) {
-            //unset($this->_data[$offset]);
-        //}
+        // $this->deleteData($offset);
+        if ($this->offsetExists($offset)) {
+            unset($this->_data[$offset]);
+        }
     }
 
     /**
@@ -598,8 +603,8 @@ class Data implements DataInterface
      */
     public function offsetGet($offset)
     {
-        return $this->getData($offset);
-        // return $this->offsetExists($offset) ? $this->_data[$offset] : null;
+        // return $this->getData($offset);
+        return $this->offsetExists($offset) ? $this->_data[$offset] : null;
     }
     
     /**
@@ -635,7 +640,7 @@ class Data implements DataInterface
      *
      * @param array $array
     */
-    function fromArray(array $array = []) // Ok
+    public function fromArray(array $array = []) // Ok
     { 
         $this->_data = $array; 
     }
@@ -645,7 +650,7 @@ class Data implements DataInterface
      *
      * @param array $array
     */
-    function mixArray($array) // Ok
+    public function mixArray($array) // Ok
     {
         foreach($array as $key => $value) 
         {
@@ -654,7 +659,7 @@ class Data implements DataInterface
     }
 
     // Вставляем только те данные из массива, ключи которых уже имеются в массиве данных модели (т.н. выборочная вставка)
-    function ownArray($array) // Ok
+    public function ownArray($array) // Ok
     {
         foreach($array as $key => $value)
         {
@@ -664,7 +669,7 @@ class Data implements DataInterface
         }
     }
 
-    function toArray() // Ok
+    public function toArray() // Ok
     {
         return $this->_data; 
     }

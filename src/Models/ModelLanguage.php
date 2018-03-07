@@ -49,15 +49,17 @@ class ModelLanguage
             }
         } elseif (isset($this->session->language)) {
             $this->language = $this->session->language;
-        } else {
+        } elseif ($langs->getLanguage()) {
             $this->language = $langs->getLanguage();
-        }
+        } else {
+		    $this->language = $this->config['settings']['language'];
+		}
 
         $host = $request->getUri()->getHost();
-        
-        $data = null;
 
-        if ($this->cache->run($host.'/'.$this->_table.'/'.$this->language, $this->cacheLifetime) === null) {
+        $return = [];
+
+		if ($this->cache->run($host.'/'.$this->_table.'/'.$this->language, $this->cacheLifetime) === null) {
 
             $responseArr = [];
             // Отдаем роутеру RouterDb конфигурацию
@@ -80,16 +82,18 @@ class ModelLanguage
                     $this->cache->set($arr);
                 }
 
-                $data = $arr;
+                $return = $arr;
  
             } else {
-                $data = $this->cache->get() ?? [];
+                $return = $this->cache->get();
             }
         } else {
-            $data = $this->cache->get() ?? [];
+            $return = $this->cache->get();
         }
+		
+		
         
-        return $data;
+        return $return;
  
     }
 

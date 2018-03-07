@@ -13,11 +13,11 @@ use Psr\Http\Message\{ServerRequestInterface as Request, ResponseInterface as Re
 use Psr\Container\ContainerInterface as Container;
 use Pllano\Core\Interfaces\ControllerInterface;
 use Pllano\Core\Controller;
+use Pllano\Core\Plugins\PluginCsrf;
 use Pllano\Core\Models\{
     ModelInstall, 
     ModelSessionUser, 
-    ModelSite, 
-    ModelSecurity
+    ModelSite
 };
 
 class Controllers extends Controller implements ControllerInterface
@@ -25,14 +25,6 @@ class Controllers extends Controller implements ControllerInterface
 
     public function get(Request $request, Response $response, array $args = [])
     {
-        // $getScheme            = $request->getUri()->getScheme(); // Работает
-        // $getQuery            = $request->getUri()->getQuery(); // Работает
-        // $getHost                = $request->getUri()->getHost(); // Работает
-        // $getPath                = $request->getUri()->getPath(); // Работает
-        // $getParams            = $request->getQueryParams(); // Работает
-        // $getMethod            = $request->getMethod();
-        // $getParsedBody        = $request->getParsedBody();
-
         $time_start = microtime_float();
         $this->query = $request->getMethod();
 
@@ -44,49 +36,28 @@ class Controllers extends Controller implements ControllerInterface
         // true - Если все хуки отказались подменять контент
         if($hook->state() === true) {
 
-            // Получаем параметры из URL
             $host = $request->getUri()->getHost();
             $path = '';
-            if($request->getUri()->getPath() != '/') {
-               $path = $request->getUri()->getPath();
-            }
+            if($request->getUri()->getPath() != '/') {$path = $request->getUri()->getPath();}
             $params = '';
             // Параметры из URL
             $params_query = str_replace('q=/', '', $request->getUri()->getQuery());
-            if ($params_query) {
-                $params = '/'.$params_query;
-            }
-
+            if ($params_query) {$params = '/'.$params_query;}
             // Данные пользователя из сессии
             $sessionUser =(new ModelSessionUser($this->app))->get();
-
             // Генерируем токен. Читаем ключ. Записываем токен в сессию.
             // Default Defuse\Crypto\Crypto
             $crypt = $this->config['vendor']['crypto']['crypt'];
             $this->session->token = $crypt::encrypt(random_token(), $this->config['key']['token']);
-
             $language = $this->languages->get($request);
             $lang = $this->languages->lang();
-
             // Настройки сайта
             $site = new ModelSite($this->app);
             $siteConfig = $site->get();
-
-            // layout по умолчанию 404
-            $render = $this->template['layouts']['404'] ? $this->template['layouts']['404'] : '404.html';
-
             // Конфигурация роутинга
             $routers = $this->config['routers'];
-
-            $admin_uri = '/_';
-            if(!empty($this->session->admin_uri)) {
-                $admin_uri = '/'.$this->session->admin_uri;
-            }
-            $post_id = '/_';
-            if(!empty($this->session->post_id)) {
-                $post_id = '/'.$this->session->post_id;
-            }
-
+            $admin_uri = '/_'; if(!empty($this->session->admin_uri)) {$admin_uri = '/'.$this->session->admin_uri;}
+            $post_id = '/_'; if(!empty($this->session->post_id)) {$post_id = '/'.$this->session->post_id;}
             // Заголовки по умолчанию из конфигурации
             $headArr = explode(',', str_replace([" ", "'"], "", $this->config['settings']['seo']['head']));
             $head = ["page" => $this->route, "host" => $host, "path" => $path, "scheme" => $this->config["server"]["scheme"].'://'];
@@ -124,7 +95,7 @@ class Controllers extends Controller implements ControllerInterface
                 }
 
                 // Модули могут поменять layout
-                $render = $dataArr['content']['modules'][$this->route]['content']['layout'] ?? $this->template['layouts']['layout'];
+                $this->render = $dataArr['content']['modules'][$this->route]['content']['layout'] ?? $this->template['layouts']['layout'];
 
                 // Массив данных который нельзя кешировать
                 $userArr = [
@@ -136,32 +107,32 @@ class Controllers extends Controller implements ControllerInterface
                 ];
 
                 // Формируем данные для шаблонизатора. Склеиваем два массива.
-                $data = array_replace_recursive($userArr, $dataArr);
+                $this->data = array_replace_recursive($userArr, $dataArr);
             } else {
 
                 $sessionTemp = new $this->config['vendor']['session']['session']("_temp");
-                $render = "index.html";
+                $this->render = "index.html";
                 // Если ключа доступа у нет, значит сайт еще не активирован
                 $content = '';
                 if (isset($this->session->install)) {
                     if ($this->session->install == 1) {
-                        $render = "stores.html";
+                        $this->render = "stores.html";
                         $content = (new ModelInstall($this->app))->stores_list();
                     } elseif ($this->session->install == 2) {
-                        $render = "templates.html";
+                        $this->render = "templates.html";
                         $install_store = $this->session->install_store ?? null;
                         $content = (new ModelInstall($this->app))->templates_list($install_store);
                     } elseif ($this->session->install == 3) {
-                        $render = "welcome.html";
+                        $this->render = "welcome.html";
                     } elseif ($this->session->install == 10) {
-                        $render = "templates.html";
+                        $this->render = "templates.html";
                         $content = (new ModelInstall($this->app))->templates_list(null);
                     } elseif ($this->session->install == 11) {
-                        $render = "key.html";
+                        $this->render = "key.html";
                     }
                 }
 
-                $data = [
+                $this->data = [
                     "head" => $head,
                     "template" => "install",
                     "routers" => $routers,
@@ -176,12 +147,12 @@ class Controllers extends Controller implements ControllerInterface
             }
 
             // Передаем данные Hooks для обработки ожидающим классам
-            $hook->get($render, $data);
+            $hook->get($this->render, $this->data);
         }
 
         $time = number_format(microtime_float() - $this->time_start, 4);
         $time_get_start = number_format(microtime_float() - $time_start, 4);
-        if ($time >= 1) {
+        if ($time >= 2) {
             // Запись в лог
             $this->logger->info("time", [
                 "source" => "ControllerManager",
@@ -193,7 +164,7 @@ class Controllers extends Controller implements ControllerInterface
             ]);
         }
 
-        if (!isset($data['content'])) {
+        if (!isset($this->data['content'])) {
             $response->withStatus(404);
         } else {
             $response->withStatus(200);
@@ -202,55 +173,31 @@ class Controllers extends Controller implements ControllerInterface
         if ($this->config['settings']["install"]["status"] != null) {
             return $response->write($this->view->render($hook->render(), $hook->view()));
         } else {
-            return $response->write($this->view->render($render, $data));
+            return $response->write($this->view->render($this->render, $this->data));
         }
 
+        // $getScheme            = $request->getUri()->getScheme(); // Работает
+        // $getQuery            = $request->getUri()->getQuery(); // Работает
+        // $getHost                = $request->getUri()->getHost(); // Работает
+        // $getPath                = $request->getUri()->getPath(); // Работает
+        // $getParams            = $request->getQueryParams(); // Работает
+        // $getMethod            = $request->getMethod();
+        // $getParsedBody        = $request->getParsedBody();
     }
  
     public function post(Request $request, Response $response, array $args = [])
     {
         $time_start = microtime_float();
-        $method = $request->getMethod();
-        $post = $request->getParsedBody();
-
-        // Передаем данные Hooks для обработки ожидающим классам
-        $hook = new $this->config['vendor']['hooks']['hook']($this->config);
-        $hook->http($request, $method, 'site');
-        $request = $hook->request();
-
-        // Читаем ключи
-        $token_key = $this->config['key']['token'];
-        $crypt = $this->config['vendor']['crypto']['crypt'];
-
-        // Подключаем систему безопасности
-        $security = new ModelSecurity($this->app);
-        try {
-            // Получаем токен из сессии
-            $token = $crypt::decrypt($this->session->token, $token_key);
-        } catch (\Exception $ex) {
-            $token = 0;
-            // Сообщение об Атаке или подборе токена
-            $security->token($request);
-        }
-        try {
-            // Получаем токен из POST
-            $post_csrf = $crypt::decrypt(sanitize($post['csrf']), $token_key);
-            // Чистим данные на всякий случай пришедшие через POST
-            $csrf = clean($post_csrf);
-        } catch (\Exception $ex) {
-            $csrf = 1;
-            // Сообщение об Атаке или подборе csrf
-            $security->csrf($request);
-        }
 
         $callbackStatus = 400;
         $callbackTitle = 'Соообщение системы';
-        $callbackText = 'Действие запрещено !';
-        $callback = ['status' => $callbackStatus, 'title' => $callbackTitle, 'text' => $callbackText];
+        $callbackText = '';
         $response->withStatus(200);
         $response->withHeader('Content-type', 'application/json');
 
-        if ($csrf == $token) {
+        $csrf = new PluginCsrf($this->core);
+        if ($csrf->check($request, $response, $args) === true) {
+
             $mods = explode(',', str_replace([" ", "'"], "", $this->config['routers']['site'][$this->route]['blocks']));
             foreach($mods as $key => $block)
             {
@@ -258,7 +205,9 @@ class Controllers extends Controller implements ControllerInterface
                 $callback = $modules->post($request);
             }
         } else {
+            $callbackTitle = "Ошибка";
             $callbackText = 'Перегрузите страницу';
+            $response->withStatus(403);
             $callback = ['status' => $callbackStatus, 'title' => $callbackTitle, 'text' => $callbackText];
         }
 
@@ -275,13 +224,14 @@ class Controllers extends Controller implements ControllerInterface
                 "uri" => escaped_url()
             ]);
         }
+
         return $response->write(json_encode($callback));
+        
     }
 
     public function getTest(Request $request, Response $response, array $args)
     {
         $view = '';
-
         $host = $request->getUri()->getHost();
         $path = '';
         if($request->getUri()->getPath() != '/') {
@@ -354,46 +304,40 @@ class Controllers extends Controller implements ControllerInterface
 
     }
 
-    public function runApi(Request $request, Response $response, array $args)
+    public function runApiTest(Request $request, Response $response, array $args)
     {
         $callback = [];
-        
         $function = strtolower($request->getMethod());
-
         // Models Directory /vendor/app/Models/
         // AutoRequire\Autoloader - Automatically registers a namespace \App in /vendor/app/
         $model = new \Core\Models\ModelApi($this->app);
         $callback = $model->$function($request, $response, $args);
-
         // return json_encode($callback, JSON_PRETTY_PRINT);
         return $callback;
-
     }
 
     public function postTest(Request $request, Response $response, array $args)
     {
-        $callback = [];
+        $callbackStatus = 400;
+        $callbackTitle = 'Соообщение системы';
+        $callbackText = '';
+        $response->withStatus(200);
+        $response->withHeader('Content-type', 'application/json');
 
-        // $getParsedBody = $request->getParsedBody();
-        
-        // Models Directory /vendor/app/models/
-        // AutoRequire\Autoloader - Automatically registers a namespace in /vendor/app/
-        // $model = new \App\Models\ModelName();
-        // $callback = $model->post();
-
-        $responseCode = 200;
-        $callbackTitle = 'Callback Title';
-        $callbackMessage = 'Callback Message';
-
-        $callback = [
-            'code' => $responseCode,
-            'title' => $callbackTitle,
-            'message' => $callbackMessage
-        ];
-
-        //return json_encode($callback, JSON_PRETTY_PRINT);
-        return $callback;
-
+        $csrf = new PluginCsrf($this->core);
+        if ($csrf->check($request, $response, $args) === true) {
+            $id = intval(sanitize($post['id']));
+            if ($id) {
+                $this->session->test_id = $id;
+            }
+            $callbackStatus = 200;
+        } else {
+            $callbackTitle = "Ошибка";
+            $callbackText = 'Действие заблокировано';
+            $response->withStatus(403);
+        }
+        $callback = ['status' => $callbackStatus, 'title' => $callbackTitle, 'text' => $callbackText];
+        return $response->write(json_encode($callback));
     }
 
 }

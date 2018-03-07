@@ -12,14 +12,17 @@ namespace Pllano\Core\Models;
 use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Pllano\Core\Interfaces\ModelInterface;
-use Pllano\Core\Model;
+use Pllano\Core\{Model, Data};
 
 class ModelUser extends Model implements ModelInterface
 {
 
-    public function __construct(Container $app)
+    private $user = [];
+	
+	public function __construct(Container $app)
     {
         parent::__construct($app);
+		$this->user = new Data([]);
         $this->connectContainer();
         $this->connectDatabases();
         $this->_table = 'user';
@@ -64,24 +67,24 @@ class ModelUser extends Model implements ModelInterface
                 //print_r($responseArr);
                 if (isset($responseArr["headers"]["code"]) && (int)$responseArr["headers"]["code"] == 200) {
                         if(is_object($responseArr["body"]["items"]["0"]["item"])) {
-                            $user = (array)$responseArr["body"]["items"]["0"]["item"];
+                            $this->user = (array)$responseArr["body"]["items"]["0"]["item"];
                         } elseif (is_array($responseArr["body"]["items"]["0"]["item"])) {
-                            $user = $responseArr["body"]["items"]["0"]["item"];
+                            $this->user = $responseArr["body"]["items"]["0"]["item"];
                         }
- 
-                        if ($user["state"] == 1) {
+
+                        if ($this->user['state'] == 1) {
                             $this->session->authorize = 1;
-                            $this->session->role_id = $user["role_id"];
+                            $this->session->role_id = $this->user["role_id"];
                             if($this->session->role_id == 100) {
                                 if(!isset($this->session->admin_uri)) {
                                     $this->session->admin_uri = random_alias_id();
                                 }
                             }
-                            $this->session->user_id = $user["id"];
-                            $this->session->iname = $crypt::encrypt($user["iname"], $session_key);
-                            $this->session->fname = $crypt::encrypt($user["fname"], $session_key);
-                            $this->session->phone = $crypt::encrypt($user["phone"], $session_key);
-                            $this->session->email = $crypt::encrypt($user["email"], $session_key);
+                            $this->session->user_id = $this->user['id'];
+                            $this->session->iname = $crypt::encrypt($this->user["iname"], $session_key);
+                            $this->session->fname = $crypt::encrypt($this->user["fname"], $session_key);
+                            $this->session->phone = $crypt::encrypt($this->user["phone"], $session_key);
+                            $this->session->email = $crypt::encrypt($this->user["email"], $session_key);
                         } else {
                             $this->session->authorize = null;
                             $this->session->role_id = null;
@@ -142,11 +145,11 @@ class ModelUser extends Model implements ModelInterface
         $responseArr = $this->db->get($this->_table, $query);
 
         if (isset($responseArr["headers"]["code"])) {
-            $item = (array)$responseArr["body"]["items"]["0"]["item"];
+            $this->user = (array)$responseArr["body"]["items"]["0"]["item"];
             // Если все ок читаем пароль
-            if (password_verify($password, $item["password"])) {
+            if (password_verify($password, $this->user["password"])) {
                 // Если все ок - отдаем user_id
-                return $item["user_id"];
+                return $this->user["user_id"];
             } else {
                 return null;
             }

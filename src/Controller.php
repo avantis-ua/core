@@ -10,12 +10,14 @@
 namespace Pllano\Core;
 
 use Psr\Container\ContainerInterface as Container;
+use Pllano\Core\Interfaces\DataInterface;
+use Pllano\Core\Data;
 
-class Controller
+class Controller extends Data implements DataInterface
 {
 
-    protected $config = [];
-    protected $time_start;
+    protected $siteId;
+	protected $config = [];
     protected $package = [];
     protected $session;
     protected $cache;
@@ -23,12 +25,16 @@ class Controller
     protected $logger;
     protected $template;
     protected $view;
+	protected $time_start;
     protected $route = 'index';
     protected $query;
+	protected $render;
+	protected $data;
 
     public function __construct(Container $app, string $route = null)
     {
         $this->app = $app;
+		$this->data = new Data([]);
         if(isset($route)) {
             $this->route = $route;
         }
@@ -41,7 +47,8 @@ class Controller
         $this->logger = $this->app->get('logger');
         $this->template = $this->app->get('template');
         $this->view = $this->app->get('view');
-        
+		$this->siteId = $this->app->get('siteId');
+		$this->render = $this->template['layouts']['404'] ? $this->template['layouts']['404'] : '404.html';
     }
 
 }

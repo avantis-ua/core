@@ -10,7 +10,7 @@
 namespace Pllano\Core\Adapters;
 
 use Pllano\Core\Adapter;
-use Pllano\Core\Interfaces\AdapterInterface;
+use Pllano\Interfaces\AdapterInterface;
 
 class Image extends Adapter implements AdapterInterface
 {

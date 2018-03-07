@@ -10,7 +10,7 @@ namespace Pllano\Core\Controllers;
 
 use Psr\Http\Message\{ServerRequestInterface as Request, ResponseInterface as Response};
 use Psr\Container\ContainerInterface as Container;
-use Pllano\Core\Interfaces\ControllerInterface;
+use Pllano\Interfaces\ControllerInterface;
 use Pllano\Core\Controller;
 use Pllano\Core\Plugins\PluginCsrf;
 use Pllano\Core\Models\{

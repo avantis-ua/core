@@ -11,13 +11,16 @@ namespace Pllano\Core\Managers;
 
 use Psr\Http\Message\{ServerRequestInterface as Request, ResponseInterface as Response};
 use Psr\Container\ContainerInterface as Container;
-use Pllano\Core\Interfaces\ControllerInterface;
+use Pllano\Interfaces\ControllerInterface;
 use Pllano\Core\Controller;
-use Pllano\Core\Plugins\PluginCsrf;
+use Pllano\Core\Plugins\{
+	PluginCsrf, 
+	PluginDefaultData
+};
 use Pllano\Core\Models\{
-    ModelInstall, 
-    ModelSessionUser, 
-    ModelSite
+	ModelInstall, 
+	ModelSessionUser, 
+	ModelSite
 };
 
 class Controllers extends Controller implements ControllerInterface
@@ -35,6 +38,8 @@ class Controllers extends Controller implements ControllerInterface
         $request = $hook->request();
         // true - Если все хуки отказались подменять контент
         if($hook->state() === true) {
+			
+			$defaultData = new PluginDefaultData($request, $this->route);
 
             $host = $request->getUri()->getHost();
             $path = '';
@@ -43,21 +48,15 @@ class Controllers extends Controller implements ControllerInterface
             // Параметры из URL
             $params_query = str_replace('q=/', '', $request->getUri()->getQuery());
             if ($params_query) {$params = '/'.$params_query;}
-            // Данные пользователя из сессии
-            $sessionUser =(new ModelSessionUser($this->app))->get();
+
             // Генерируем токен. Читаем ключ. Записываем токен в сессию.
             // Default Defuse\Crypto\Crypto
             $crypt = $this->config['vendor']['crypto']['crypt'];
             $this->session->token = $crypt::encrypt(random_token(), $this->config['key']['token']);
-            $language = $this->languages->get($request);
-            $lang = $this->languages->lang();
-            // Настройки сайта
-            $site = new ModelSite($this->app);
-            $siteConfig = $site->get();
-            // Конфигурация роутинга
-            $routers = $this->config['routers'];
-            $admin_uri = '/_'; if(!empty($this->session->admin_uri)) {$admin_uri = '/'.$this->session->admin_uri;}
-            $post_id = '/_'; if(!empty($this->session->post_id)) {$post_id = '/'.$this->session->post_id;}
+			
+			$this->language = $this->languages->get($request);
+			$this->lang = $this->languages->lang();
+
             // Заголовки по умолчанию из конфигурации
             $headArr = explode(',', str_replace([" ", "'"], "", $this->config['settings']['seo']['head']));
             $head = ["page" => $this->route, "host" => $host, "path" => $path, "scheme" => $this->config["server"]["scheme"].'://'];
@@ -72,11 +71,11 @@ class Controllers extends Controller implements ControllerInterface
                 $pluginsArr = [];
                 $dataArr = [];
                 $arr = [];
-                if ($this->cache->run($host.''.$params.'/'.$lang.'/'.$this->route) === null) {
+                if ($this->cache->run($host.''.$params.'/'.$this->lang.'/'.$this->route) === null) {
                     $dataArr = [
                         "head" => $head,
-                        "routers" => $routers,
-                        "site" => $siteConfig,
+                        "routers" => $this->routers,
+                        "site" => $this->site->get(),
                         "config" => $this->config['settings']['site'],
                         "template" => $this->template
                     ];
@@ -99,11 +98,11 @@ class Controllers extends Controller implements ControllerInterface
 
                 // Массив данных который нельзя кешировать
                 $userArr = [
-                    "language" => $language,
+                    "language" => $this->language,
                     "token" => $this->session->token,
-                    "post_id" => $post_id,
-                    "admin_uri" => $admin_uri,
-                    "session" => $sessionUser
+                    "post_id" => $this->post_id,
+                    "admin_uri" => $this->admin_uri,
+                    "session" => $this->sessionUser
                 ];
 
                 // Формируем данные для шаблонизатора. Склеиваем два массива.
@@ -135,12 +134,12 @@ class Controllers extends Controller implements ControllerInterface
                 $this->data = [
                     "head" => $head,
                     "template" => "install",
-                    "routers" => $routers,
+                    "routers" => $this->routers,
                     "config" => $this->config['settings']['site'],
-                    "language" => $language,
+                    "language" => $this->language,
                     "token" => $this->session->token,
-                    "post_id" => $post_id,
-                    "session" => $sessionUser,
+                    "post_id" => $this->post_id,
+                    "session" => $this->sessionUser,
                     "session_temp" => $sessionTemp,
                     "content" => $content
                 ];

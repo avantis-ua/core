@@ -11,7 +11,7 @@ namespace Pllano\Core\Models;
 
 use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Pllano\Core\Interfaces\ModelInterface;
+use Pllano\Interfaces\ModelInterface;
 use Pllano\Core\Model;
 
 class ModelSite extends Model implements ModelInterface
@@ -45,21 +45,25 @@ class ModelSite extends Model implements ModelInterface
             // Отправляем запрос к БД в формате адаптера. В этом случае Apis
             $responseArr = $this->db->get($this->_table);
 
-            $site = null;
             if(isset($responseArr["body"]["items"]["0"]["item"])) {
                 if ($responseArr != null) {
-                    $site = $responseArr["body"]["items"]["0"]["item"];
+                    $this->data = $responseArr["body"]["items"]["0"]["item"];
                 }
             }
             if ($this->cache->state() == 1) {
-                $this->cache->set($site);
+                $this->cache->set($this->data);
             }
-            return $site;
+            return $this->data;
 
         } else {
              return $this->cache->get();
         }
     }
+	
+    public function getOne($id = null)
+    {
+		
+	}
 
     public function template()
     {

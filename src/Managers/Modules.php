@@ -11,7 +11,7 @@ namespace Pllano\Core\Managers;
 
 use Psr\Http\Message\{ServerRequestInterface as Request, ResponseInterface as Response};
 use Psr\Container\ContainerInterface as Container;
-use Pllano\Core\Interfaces\ManagerInterface;
+use Pllano\Interfaces\ManagerInterface;
  
 class Modules implements ManagerInterface
 {

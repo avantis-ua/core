@@ -10,7 +10,7 @@
 namespace Pllano\Core;
 
 use Psr\Container\ContainerInterface as Container;
-use Pllano\Core\Interfaces\ModelInterface;
+use Pllano\Interfaces\ModelInterface;
 use Pllano\Core\Data;
 
 class Model extends Data implements ModelInterface
@@ -143,14 +143,13 @@ class Model extends Data implements ModelInterface
         }
 
         $this->_lastQuery = $select->__toString();
-
         $rows = $this->db->query($select)->fetchAll();
-        if(is_array($rows))
-        {
+
+        if(is_array($rows)) {
             foreach($rows as $row)
             {
-                $modelClassName = get_class($this);
-                $model = new $modelClassName();
+                $class = get_class($this);
+                $model = new $class();
                 $model->setTable($this->_table);
                 $model->fromArray($row);
                 $r[] = $model;

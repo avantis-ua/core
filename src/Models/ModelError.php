@@ -11,8 +11,8 @@ namespace Pllano\Core\Models;
 
 use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Pllano\Core\Interfaces\ModelInterface;
-use Pllano\Core\Model;
+use Pllano\Interfaces\ModelInterface;
+use Pllano\Core\{Model, Data};
 
 class ModelError extends Model implements ModelInterface
 {

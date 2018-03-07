@@ -9,7 +9,7 @@
  */
 namespace Pllano\Core;
 
-use Pllano\Core\Interfaces\DataInterface;
+use Pllano\Interfaces\DataInterface;
 
 class Data implements DataInterface
 {

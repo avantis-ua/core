@@ -9,7 +9,7 @@
  */
 namespace Pllano\Core\Plugins;
 
-use Pllano\Core\Interfaces\PluginInterface;
+use Pllano\Interfaces\PluginInterface;
  
 class PluginTemplate implements PluginInterface
 {
@@ -24,7 +24,7 @@ class PluginTemplate implements PluginInterface
         }
         $this->config = $config;
     }
- 
+
     public function get()
     {
         $resp["templates"] = [];
@@ -57,9 +57,22 @@ class PluginTemplate implements PluginInterface
             }
         }
         return $resp;
-
     }
- 
+
+    public function config()
+    {
+        if(isset($this->template)) {
+            $json_dir = $this->config['template']['front_end']['themes']['dir'].'/'.$this->config['template']['front_end']['themes']['templates'].'/'.$this->template.'/config/';
+            if (file_exists($json_dir."config.json")) {
+                return json_decode(file_get_contents($json_dir."config.json"), true);
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
     public function getOne()
     {
         if ($this->template != null) {
@@ -73,7 +86,7 @@ class PluginTemplate implements PluginInterface
             return null;
         }
     }
- 
+
     public function put($param)
     {
         $arr = array_replace_recursive($this->get(), $param);

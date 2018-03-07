@@ -9,31 +9,36 @@
  */
 namespace Pllano\Core\Models;
 
+use Pllano\Core\Plugins\PluginTemplate;
+
 class ModelTemplate
 {
 
-    private $template;
-    private $config;
+	private $plugin;
 
     public function __construct($config, $template)
     {
-        $this->config = $config;
-        $this->template = $template;
+		$this->plugin = new PluginTemplate($config, $template);
     }
 
     public function get()
     {
-        if(isset($this->template)) {
-            $json_dir = $this->config['template']['front_end']['themes']['dir'].'/'.$this->config['template']['front_end']['themes']['templates'].'/'.$this->template.'/config/';
-            if (file_exists($json_dir."config.json")) {
-                return json_decode(file_get_contents($json_dir."config.json"), true);
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
+		return $this->plugin->config();
+    }
+
+    public function getAll()
+    {
+		return $this->plugin->get();
+    }
+
+    public function getOne()
+    {
+		return $this->plugin->getOne();
+    }
+
+    public function put($param)
+    {
+		return $this->plugin->put($param);
     }
 
 }
- 

@@ -9,7 +9,7 @@
  */
 namespace Pllano\Core\Models\Admin;
 
-use Pllano\Core\Interfaces\ModelInterface;
+use Pllano\Interfaces\ModelInterface;
 use Pllano\Core\Model;
 use Pllano\RouterDb\Router as RouterDb;
 

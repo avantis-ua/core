@@ -9,7 +9,7 @@
  */
 namespace Pllano\Core\Plugins;
 
-use Pllano\Core\Interfaces\PluginInterface;
+use Pllano\Interfaces\PluginInterface;
 
 class PluginDatabase implements PluginInterface
 {

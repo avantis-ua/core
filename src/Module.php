@@ -11,7 +11,7 @@ namespace Pllano\Core;
 
 use Psr\Http\Message\{ServerRequestInterface as Request, ResponseInterface as Response};
 use Psr\Container\ContainerInterface as Container;
-use Pllano\Core\Interfaces\ModuleInterface;
+use Pllano\Interfaces\ModuleInterface;
 
 class Module extends Model implements ModuleInterface
 {

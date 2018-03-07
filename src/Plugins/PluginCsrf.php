@@ -10,7 +10,7 @@ namespace Pllano\Core\Plugins;
 
 use Psr\Http\Message\{ServerRequestInterface as Request, ResponseInterface as Response};
 use Psr\Container\ContainerInterface as Container;
-use Pllano\Core\Interfaces\PluginInterface;
+use Pllano\Interfaces\PluginInterface;
 use Pllano\Core\Models\ModelSecurity;
 
 class PluginCsrf implements PluginInterface

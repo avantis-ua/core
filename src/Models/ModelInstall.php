@@ -10,10 +10,11 @@
 namespace Pllano\Core\Models;
 
 use Psr\Container\ContainerInterface as Container;
-use Pllano\Core\Interfaces\ModelInterface;
-use Pllano\Core\Model;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Pllano\Interfaces\ModelInterface;
+use Pllano\Core\{Model, Data};
 
-class ModelInstall extends Model implements ModelInterface
+class ModelAreaCity extends Model implements ModelInterface
 {
 
     public function __construct(Container $app)
@@ -36,8 +37,8 @@ class ModelInstall extends Model implements ModelInterface
         $this->db = $this->routerDb->run($this->_database);
         // Отправляем запрос к БД в формате адаптера. В этом случае Apis
         $responseArr = $this->db->get($this->_table);
-        $this->_data = $responseArr["body"]["items"] ?? [];
-        return $this->_data;
+        $this->data = $responseArr["body"]["items"] ?? [];
+        return $this->data;
     }
 
     public function templates_list($store = null)
@@ -57,8 +58,8 @@ class ModelInstall extends Model implements ModelInterface
         } else {
             $responseArr = $this->db->get($this->_table);
         }
-        $this->_data = $responseArr["body"]["items"] ?? [];
-        return $this->_data;
+        $this->data = $responseArr["body"]["items"] ?? [];
+        return $this->data;
     }
 
 }

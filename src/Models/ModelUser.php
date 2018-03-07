@@ -11,13 +11,14 @@ namespace Pllano\Core\Models;
 
 use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Pllano\Core\Interfaces\ModelInterface;
+use Pllano\Interfaces\ModelInterface;
 use Pllano\Core\{Model, Data};
 
 class ModelUser extends Model implements ModelInterface
 {
 
     private $user = [];
+	private $modules = [];
 	
 	public function __construct(Container $app)
     {
@@ -27,6 +28,9 @@ class ModelUser extends Model implements ModelInterface
         $this->connectDatabases();
         $this->_table = 'user';
         $this->_idField = 'id';
+        $this->modules = $this->app->get('modules');
+		// $this->_adapter = 'Pdo';
+		// $this->db->setAdapter($this->_adapter);
     }
 
     // Запускаем сессию пользоваетеля
@@ -238,6 +242,79 @@ class ModelUser extends Model implements ModelInterface
             return null;
         }
     }
+
+    // Выйти
+	static public function logOuts(Request $request)
+	{
+        $modulVal = $this->modules['logout']['logout'];
+        $modules = new $modulVal['vendor']($this->app, $this->route, 'logout', 'logout', $modulVal);
+        $modules->post($request);
+	}
+
+	// Регистрируем-авторизуем посетителя и обновляем его контакты
+	public function registerMe()
+	{
+		
+    }
+
+	// Регистрируем-авторизуем посетителя и обновляем его контакты
+	public function authorizeMe()
+	{
+		
+	}
+
+	// Ищем пользователя и среди неактивных тоже
+	private function checkDoubleUser()
+	{
+		
+	}
+
+	// Ищем имейлы
+	private function checkDoubleEmail()
+	{
+		
+	}
+
+	// Ищем телефон
+	private function checkDoublePhone()
+	{
+		
+    }
+
+	public function checkAuth()
+	{
+		
+	}
+
+	// Удаляем регистрацию, корзину, все товары в ней - отладочная функция
+	static public function unregisterMe()
+	{
+		
+	}
+
+    // Что ?
+	static public function removeRegistration()
+	{
+		
+	}
+
+	// Генерируем проверочный код для регистрации, действительный 15 минут
+	static public function codeGenerate()
+	{
+		
+	}
+
+	// Проверка проверочного кода. Если есть и не просрочен
+	static public function codeCheck()
+	{
+		
+	}
+
+    // Высылаем проверочный код на почту
+	public function sendCode($email, $code, $phone, $id)
+	{
+		
+	}
 
 }
  

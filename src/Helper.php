@@ -9,7 +9,7 @@
  */
 namespace Pllano\Core;
 
-use Pllano\Core\Interfaces\HelperInterface;
+use Pllano\Interfaces\HelperInterface;
 
 class Helper implements HelperInterface
 {

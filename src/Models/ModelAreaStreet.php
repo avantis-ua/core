@@ -17,12 +17,12 @@ use Pllano\Core\{Model, Data};
 class ModelAreaStreet extends Model implements ModelInterface
 {
 
-	private $street = [];
+    private $street = [];
 
-	public function __construct(Container $app)
+    public function __construct(Container $app)
     {
         parent::__construct($app);
-		$this->street = new Data([]);
+        $this->street = new Data([]);
         $this->connectContainer();
         $this->connectDatabases();
         $this->_table = 'area_street';

@@ -17,12 +17,12 @@ use Pllano\Core\{Model, Data};
 class ModelAddress extends Model implements ModelInterface
 {
 
-	private $address = [];
+    private $address = [];
 
-	public function __construct(Container $app)
+    public function __construct(Container $app)
     {
         parent::__construct($app);
-		$this->address = new Data([]);
+        $this->address = new Data([]);
         $this->connectContainer();
         $this->connectDatabases();
         $this->_table = 'address';

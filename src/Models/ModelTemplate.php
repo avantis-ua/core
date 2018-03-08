@@ -14,31 +14,31 @@ use Pllano\Core\Plugins\PluginTemplate;
 class ModelTemplate
 {
 
-	private $plugin;
+    private $plugin;
 
     public function __construct($config, $template)
     {
-		$this->plugin = new PluginTemplate($config, $template);
+        $this->plugin = new PluginTemplate($config, $template);
     }
 
     public function get()
     {
-		return $this->plugin->config();
+        return $this->plugin->config();
     }
 
     public function getAll()
     {
-		return $this->plugin->get();
+        return $this->plugin->get();
     }
 
     public function getOne()
     {
-		return $this->plugin->getOne();
+        return $this->plugin->getOne();
     }
 
     public function put($param)
     {
-		return $this->plugin->put($param);
+        return $this->plugin->put($param);
     }
 
 }

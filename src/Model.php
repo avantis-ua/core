@@ -17,7 +17,7 @@ class Model extends Data implements ModelInterface
 {
 
     protected $app;
-	protected $data;
+    protected $data;
 
     protected $config = [];
     protected $time_start;
@@ -49,7 +49,8 @@ class Model extends Data implements ModelInterface
     {
         $this->app = $app;
         $this->data = new Data([]);
-		$this->config = $this->app->get('config');
+        $this->config = $this->app->get('config');
+        $this->connectDatabases();
     }
 
     public function connectContainer()
@@ -71,12 +72,6 @@ class Model extends Data implements ModelInterface
         $this->routerDb->setConfig($this->config, $this->_adapter, $this->_driver);
         $this->database = $this->routerDb->ping($this->_table);
         $this->db = $this->routerDb->run($this->database);
-
-    }
-
-    public function connectRouterDb()
-    {
-        $this->connectDatabases();
     }
 
     public function connectPdo()
@@ -89,14 +84,13 @@ class Model extends Data implements ModelInterface
         $this->slim_pdo = $this->app->get('slim_pdo');
     }
 
-    /*************************************
-    * Интерфейс работы с БД
-    *************************************/
+    public function last_id(string $resource = null, string $field_id = null): int
+    {
+        return (int)$this->db->last_id($resource, $field_id);
+    }
 
-    // Строим запрос для списка или выборки одного объекта
     public function select()
     {
-        $this->connectRouterDb();
         return $this->db->select()->from($this->_table);
     }
 
@@ -105,10 +99,118 @@ class Model extends Data implements ModelInterface
         return $this->select()->query($query)->fetchAll();
     }
 
-    public function getList($filters = [], $joinTables = null, $orderBy = null, $count = null, $offset = null) // Нужно тестить
+    public function getList(array $filters = [], $joinTables = null, $orderBy = null, $count = null, $offset = null)
     {
-        $this->connectDatabases();
+        return $this->db->getList($filters, $joinTables, $orderBy, $count, $offset);
+    }
 
+    public function getOne($id = null)
+    {
+        return $this->db->getOne($id);
+    }
+
+    public function getIdByAlias(string $alias): int
+    {
+        $this->data = $this->db->get($this->_table, ["alias" => $alias, "state" => 1]);
+        if($this->data) {
+            return $this->data['id'];
+        } else {
+            return 0;
+        }
+    }
+
+    public function save()
+    {
+        return $this->db->save();
+    }
+
+    public function delete()
+    {
+        $this->db->delete();
+    }
+
+    public function counts($table, $whereState)
+    {
+        $this->db->counts($table, $whereState);
+    }
+
+    public function getFieldMap($table = null)
+    {
+        if (isset($table)) {
+             $this->_fieldMap = $this->db->fieldMap($table);
+        }
+    }
+
+    public function fieldMap($table = null)
+    {
+        $fieldMap = null;
+        if (isset($table)) {
+             $fieldMap = $this->db->fieldMap($table);
+        }
+        return $fieldMap;
+    }
+
+    public function tableSchema($table = null)
+    {
+        if (isset($table)) {
+            return $this->db->tableSchema($table);
+        } else {
+            return null;
+        }
+    }
+
+    public function setTable($table = null)
+    {
+        if (isset($table)) {
+            $this->_table = $table;
+            if($this->_idField === null) {
+                $this->_idField = "id";
+            }
+            if($this->_table !== 'abstract' && ) {
+                $this->_fieldMap = $this->db->fieldMap($this->_table);
+            }
+        }
+    }
+
+    public function getTable()
+    {
+        return $this->_table;
+    }
+
+    public function getIdField()
+    {
+        return $this->_idField;
+    }
+
+    public function setIdField($fieldName = null)
+    {
+        if(isset($fieldName)) {
+            $this->_idField = $fieldName;
+        }
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static public function selectDate($minutes = null)
+    {
+        if (isset($this->_adapter == 'Pdo')) {
+            return $this->db::selectDate($minutes);
+        } else {
+            return null;
+        }
+    }
+
+
+    public function counts($table, $whereState)
+    {
+        $select = 'SELECT COUNT(*) AS `num` FROM `'.$table.'` WHERE '. $whereState;
+        $row = $this->db->query($select)->fetch();
+        return $row['num'];
+    }
+    
+    public function getList(array $filters = [], $joinTables = null, $orderBy = null, $count = null, $offset = null)
+    {
+        // Нужно тестить
         $r = [];
         $select = $this->select();
         if (isset($joinTables)) {
@@ -143,7 +245,7 @@ class Model extends Data implements ModelInterface
         }
 
         $this->_lastQuery = $select->__toString();
-        $rows = $this->db->query($select)->fetchAll();
+        $rows = $this->query($select)->fetchAll();
 
         if(is_array($rows)) {
             foreach($rows as $row)
@@ -158,15 +260,13 @@ class Model extends Data implements ModelInterface
         return $r;
     }
 
-    // Если аргумент === массив, работаем со свободным WHERE-AND!
-    public function getOne($id = null) // Нужно тестить
+    public function getOne($id = null) 
     {
-        $this->connectDatabases();
-        
+        // Если аргумент === массив, работаем со свободным WHERE-AND!
+        // Нужно тестить
         $select = $this->select();
         if (isset($id)) {
-            if(is_array($id)) 
-            {
+            if(is_array($id)) {
                 foreach($id as $filterKey => $filterValue)
                 {
                     $select->where($filterKey, $filterValue);
@@ -174,7 +274,7 @@ class Model extends Data implements ModelInterface
             } else {
                 $select->where($this->_idField, '=', intval($id));
             }
-        } elseif($this->hasId()) { 
+        } elseif($this->hasId()) {
             $id = $this->getId(); // если не обозначен аргумент, берем из данных модели
         } else {
             return false; // throw new Exception(__METHOD__ . " : not ID#");
@@ -182,7 +282,7 @@ class Model extends Data implements ModelInterface
 
         //$this->_lastQuery = $select->__toString();
 
-        $rows = $this->db->query($select)->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $this->query($select)->fetchAll(PDO::FETCH_ASSOC);
 
         $r = false;
         if(is_array($rows)) {
@@ -196,20 +296,17 @@ class Model extends Data implements ModelInterface
 
     public function getIdByAlias($alias)
     {
-        $this->connectDatabases();
         $query = [
             "alias" => $alias,
             "site_id" => $this->siteId
         ];
         $id = null;
-        $this->data = $this->db->get($this->_table, $query, $id, $this->_idField);
+        $this->data = $this->get($this->_table, $query, $id, $this->_idField);
         return $this->data['id'] ?? null;
     }
 
-    // Save
-    public function save() // Нужно тестить
+    public function save()
     {
-        $this->connectDatabases();
         $current_date = $this->selectDate();
         $this->data['modified'] = $current_date;
         $this->data['visited'] = $current_date;
@@ -217,120 +314,34 @@ class Model extends Data implements ModelInterface
         {
             $this->data['created'] = $current_date;
 
-            $this->db->insert($this->toArray());
+            $this->insert($this->toArray());
             
-            $this->setId($this->db->lastInsertId());
+            $this->setId($this->lastInsertId());
             
             return $this->getId();
         } else {
-            $where = $this->db->quoteInto($this->_idField." = ?", $this->getId());
-            $rows_affected = $this->db->update($this->toArray(), $where);
+            $where = $this->quoteInto($this->_idField." = ?", $this->getId());
+            $rows_affected = $this->update($this->toArray(), $where);
             return null;
         }
     }
 
-    // Delete
-    public function delete() // Ok
+    public function delete()
     {
-        $this->connectDatabases();
         if(!$this->hasId()) throw new \Exception("::Trying to remove nonexistent property!");
-        $this->db->delete()
+        $this->delete()
                  ->from($this->_table)
                  ->where($this->_idField, '=', $this->getId());
     }
 
-    // Подсчитываем количество полей в указанной таблице
-    public function countIt($table, $whereState) // Ok
+    protected function _buildSelectQuery()
     {
-        $this->connectDatabases();
-        $select = 'SELECT COUNT(*) AS `num` FROM `'.$table.'` WHERE '. $whereState;
-        $row = $this->db->query($select)->fetch();
-        return $row['num'];
-    }
-
-    public function getFieldMap($table = null) // Ok
-    {
-        if (isset($table)) {
-             $this->connectDatabases();
-             $this->_fieldMap = $this->db->fieldMap($table);
-        }
-    }
-
-    public function fieldMap($table = null) // Ok
-    {
-        $fieldMap = null;
-        if (isset($table)) {
-             $this->connectDatabases();
-             $fieldMap = $this->db->fieldMap($table);
-        }
-        return $fieldMap;
-    }
-
-    public function tableSchema($table = null) // Ok
-    {
-        $table_schema = [];
-        if (isset($table)) {
-            $fieldMap = $this->fieldMap($table);
-            foreach($fieldMap as $column)
-            {
-                $field = $column['Field'];
-                $field_type = $column['Type'];
-                $table_schema[$field] = $field_type;
-            }
-        }
-        return $table_schema;
-    }
-
-    public function setTable($table) // Ok
-    {
-        $this->_table = $table;
-        if($this->_idField === null) {
-            $this->_idField = "id";
-        }
-        if($this->_table !== 'abstract')
-        {
-            $this->connectDatabases();
-            $this->_fieldMap = $this->db->fieldMap($this->_table);
-        }
-    }
-
-    public function getTable() // Ok
-    {
-        return $this->_table;
-    }
-
-    public function getIdField() // Ok
-    {
-        return $this->_idField;
-    }
-
-    public function setIdField($fieldName = null) // Ok
-    {
-        if(isset($fieldName)) {
-            $this->_idField = $fieldName;
-        }
-    }
-
-    // Получаем дату в формате "0000-00-00 00:00:00"
-    // $minutes должно быть целым положительным числом
-    static public function selectDate($minutes = null) // Ok
-    {
-        $this->connectDatabases();
-        if (isset($minutes)) {
-            $query = "SELECT DATE_FORMAT(NOW() + INTERVAL '".intval($minutes)."' MINUTE, '%Y-%m-%d %H:%i:%s') AS selected_date";
-        } else {
-            $query = "SELECT DATE_FORMAT(NOW(), '%Y-%m-%d %H:%i:%s') AS selected_date";
-        }
-        $row = $this->db->query($query)->fetch(PDO::FETCH_OBJ);
-        return $row->selected_date;
-    }
-    
-    // Строим запрос для списка или выборки одного объекта
-    protected function _buildSelectQuery() // Ok
-    {
+        // Строим запрос для списка или выборки одного объекта
         $this->connectDatabases();
         return $this->db->select()->from($this->_table);
     }
+
+
 
 }
  

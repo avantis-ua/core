@@ -17,12 +17,12 @@ use Pllano\Core\{Model, Data};
 class ModelAreaGeo extends Model implements ModelInterface
 {
 
-	private $geo = [];
+    private $geo = [];
 
-	public function __construct(Container $app)
+    public function __construct(Container $app)
     {
         parent::__construct($app);
-		$this->geo = new Data([]);
+        $this->geo = new Data([]);
         $this->connectContainer();
         $this->connectDatabases();
         $this->_table = 'area_geo';

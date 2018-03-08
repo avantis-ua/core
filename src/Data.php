@@ -480,7 +480,7 @@ class Data implements DataInterface
             $this->_data = &$array;
         }
     }
-	
+    
     public function __invoke()
     {
         return $this->_data;

@@ -52,14 +52,14 @@ class ModelLanguage
         } elseif ($langs->getLanguage()) {
             $this->language = $langs->getLanguage();
         } else {
-		    $this->language = $this->config['settings']['language'];
-		}
+            $this->language = $this->config['settings']['language'];
+        }
 
         $host = $request->getUri()->getHost();
 
         $return = [];
 
-		if ($this->cache->run($host.'/'.$this->_table.'/'.$this->language, $this->cacheLifetime) === null) {
+        if ($this->cache->run($host.'/'.$this->_table.'/'.$this->language, $this->cacheLifetime) === null) {
 
             $responseArr = [];
             // Отдаем роутеру RouterDb конфигурацию
@@ -90,8 +90,8 @@ class ModelLanguage
         } else {
             $return = $this->cache->get();
         }
-		
-		
+        
+        
         
         return $return;
  

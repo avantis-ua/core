@@ -14,13 +14,13 @@ use Psr\Container\ContainerInterface as Container;
 use Pllano\Interfaces\ControllerInterface;
 use Pllano\Core\Controller;
 use Pllano\Core\Plugins\{
-	PluginCsrf, 
-	PluginDefaultData
+    PluginCsrf, 
+    PluginDefaultData
 };
 use Pllano\Core\Models\{
-	ModelInstall, 
-	ModelSessionUser, 
-	ModelSite
+    ModelInstall, 
+    ModelSessionUser, 
+    ModelSite
 };
 
 class Controllers extends Controller implements ControllerInterface
@@ -38,8 +38,8 @@ class Controllers extends Controller implements ControllerInterface
         $request = $hook->request();
         // true - Если все хуки отказались подменять контент
         if($hook->state() === true) {
-			
-			$defaultData = new PluginDefaultData($request, $this->route);
+            
+            $defaultData = new PluginDefaultData($request, $this->route);
 
             $host = $request->getUri()->getHost();
             $path = '';
@@ -53,9 +53,9 @@ class Controllers extends Controller implements ControllerInterface
             // Default Defuse\Crypto\Crypto
             $crypt = $this->config['vendor']['crypto']['crypt'];
             $this->session->token = $crypt::encrypt(random_token(), $this->config['key']['token']);
-			
-			$this->language = $this->languages->get($request);
-			$this->lang = $this->languages->lang();
+            
+            $this->language = $this->languages->get($request);
+            $this->lang = $this->languages->lang();
 
             // Заголовки по умолчанию из конфигурации
             $headArr = explode(',', str_replace([" ", "'"], "", $this->config['settings']['seo']['head']));

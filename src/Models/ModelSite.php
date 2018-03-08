@@ -59,11 +59,11 @@ class ModelSite extends Model implements ModelInterface
              return $this->cache->get();
         }
     }
-	
+    
     public function getOne($id = null)
     {
-		
-	}
+        
+    }
 
     public function template()
     {

@@ -12,25 +12,26 @@ namespace Pllano\Core\Models;
 use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Pllano\Interfaces\ModelInterface;
+use Pllano\Interfaces\ModelsInterfaces\UserInterface;
 use Pllano\Core\{Model, Data};
 
-class ModelUser extends Model implements ModelInterface
+class ModelUser extends Model implements ModelInterface, UserInterface
 {
 
     private $user = [];
-	private $modules = [];
-	
-	public function __construct(Container $app)
+    private $modules = [];
+    
+    public function __construct(Container $app)
     {
         parent::__construct($app);
-		$this->user = new Data([]);
+        $this->user = new Data([]);
         $this->connectContainer();
         $this->connectDatabases();
         $this->_table = 'user';
         $this->_idField = 'id';
         $this->modules = $this->app->get('modules');
-		// $this->_adapter = 'Pdo';
-		// $this->db->setAdapter($this->_adapter);
+        // $this->_adapter = 'Pdo';
+        // $this->db->setAdapter($this->_adapter);
     }
 
     // Запускаем сессию пользоваетеля
@@ -244,77 +245,77 @@ class ModelUser extends Model implements ModelInterface
     }
 
     // Выйти
-	static public function logOuts(Request $request)
-	{
+    static public function logOuts(Request $request)
+    {
         $modulVal = $this->modules['logout']['logout'];
         $modules = new $modulVal['vendor']($this->app, $this->route, 'logout', 'logout', $modulVal);
         $modules->post($request);
-	}
-
-	// Регистрируем-авторизуем посетителя и обновляем его контакты
-	public function registerMe()
-	{
-		
     }
 
-	// Регистрируем-авторизуем посетителя и обновляем его контакты
-	public function authorizeMe()
-	{
-		
-	}
-
-	// Ищем пользователя и среди неактивных тоже
-	private function checkDoubleUser()
-	{
-		
-	}
-
-	// Ищем имейлы
-	private function checkDoubleEmail()
-	{
-		
-	}
-
-	// Ищем телефон
-	private function checkDoublePhone()
-	{
-		
+    // Регистрируем-авторизуем посетителя и обновляем его контакты
+    public function registerMe()
+    {
+        
     }
 
-	public function checkAuth()
-	{
-		
-	}
+    // Регистрируем-авторизуем посетителя и обновляем его контакты
+    public function authorizeMe()
+    {
+        
+    }
 
-	// Удаляем регистрацию, корзину, все товары в ней - отладочная функция
-	static public function unregisterMe()
-	{
-		
-	}
+    // Ищем пользователя и среди неактивных тоже
+    private function checkDoubleUser()
+    {
+        
+    }
+
+    // Ищем имейлы
+    private function checkDoubleEmail()
+    {
+        
+    }
+
+    // Ищем телефон
+    private function checkDoublePhone()
+    {
+        
+    }
+
+    public function checkAuth()
+    {
+        
+    }
+
+    // Удаляем регистрацию, корзину, все товары в ней - отладочная функция
+    static public function unregisterMe()
+    {
+        
+    }
 
     // Что ?
-	static public function removeRegistration()
-	{
-		
-	}
+    static public function removeRegistration()
+    {
+        
+    }
 
-	// Генерируем проверочный код для регистрации, действительный 15 минут
-	static public function codeGenerate()
-	{
-		
-	}
+    // Генерируем проверочный код для регистрации, действительный 15 минут
+    static public function codeGenerate()
+    {
+        
+    }
 
-	// Проверка проверочного кода. Если есть и не просрочен
-	static public function codeCheck()
-	{
-		
-	}
+    // Проверка проверочного кода. Если есть и не просрочен
+    static public function codeCheck()
+    {
+        
+    }
 
     // Высылаем проверочный код на почту
-	public function sendCode($email, $code, $phone, $id)
-	{
-		
-	}
+    public function sendCode($email, $code, $phone, $id)
+    {
+        
+    }
 
 }
  

@@ -14,19 +14,19 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Pllano\Interfaces\ModelInterface;
 use Pllano\Core\{Model, Data};
 
-class ModelAreaInfo extends Model implements ModelInterface
+class ModelUserData extends Model implements ModelInterface
 {
 
-    private $info = [];
+    private $userdata = [];
 
     public function __construct(Container $app)
     {
         parent::__construct($app);
-        $this->info = new Data([]);
+        $this->userdata = new Data([]);
         $this->connectContainer();
         $this->connectDatabases();
-        $this->_table = 'area_info';
-        $this->_idField = 'info_id';
+        $this->_table = 'cart_userdata';
+        $this->_idField = 'id';
     }
 
 }

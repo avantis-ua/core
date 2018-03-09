@@ -29,6 +29,10 @@ class ModelLanguage
         $this->session = $session;
         $this->routerDb = $routerDb;
         $this->_table = 'language';
+        //$this->_idField = "language_id";
+        //$this->_adapter = 'Pdo';
+        //$this->db->setAdapter($this->_adapter);
+        //$this->connectDatabases();
     }
 
     // Ресурс language доступен только на чтение

@@ -23,6 +23,11 @@ class ModelError extends Model implements ModelInterface
         // $this->connectContainer();
         //$this->connectDatabases();
     }
+    
+    public function update404()
+    {
+
+    }
 
     public function get(Request $request, Response $response, array $args)
     {

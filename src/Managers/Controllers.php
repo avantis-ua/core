@@ -39,7 +39,7 @@ class Controllers extends Controller implements ControllerInterface
         // true - Если все хуки отказались подменять контент
         if($hook->state() === true) {
             
-            $defaultData = new PluginDefaultData($request, $this->route);
+            //$defaultData = new PluginDefaultData($request, $this->route);
 
             $host = $request->getUri()->getHost();
             $path = '';

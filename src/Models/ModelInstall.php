@@ -30,7 +30,7 @@ class ModelAreaCity extends Model implements ModelInterface
         // Ресурс к которому обращаемся
         $this->_table = "stores_list";
         // Отдаем роутеру RouterDb конфигурацию
-        $this->routerDb->setConfig([], 'Apis');
+        $this->routerDb->setConfig([], 'Pllano', 'Apis');
         // Пингуем для ресурса указанную и доступную базу данных
         $this->_database = $this->routerDb->ping($this->_table);
         // Подключаемся к БД через выбранный Adapter: Sql, Pdo или Apis (По умолчанию Pdo)
@@ -47,7 +47,7 @@ class ModelAreaCity extends Model implements ModelInterface
         // Ресурс к которому обращаемся
         $this->_table = "templates_list";
         // Отдаем роутеру RouterDb конфигурацию
-        $this->routerDb->setConfig([], 'Apis');
+        $this->routerDb->setConfig([], 'Pllano', 'Apis');
         // Пингуем для ресурса указанную и доступную базу данных
         $this->_database = $this->routerDb->ping($this->_table);
         // Подключаемся к БД через выбранный Adapter: Sql, Pdo или Apis (По умолчанию Pdo)

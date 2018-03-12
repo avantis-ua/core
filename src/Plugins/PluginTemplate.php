@@ -13,8 +13,8 @@ use Pllano\Interfaces\PluginInterface;
  
 class PluginTemplate implements PluginInterface
 {
-    private $template = null;
-    private $config;
+    protected $template = null;
+    protected $config;
  
     function __construct($config, $template = null)
     {

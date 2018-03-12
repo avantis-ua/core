@@ -606,16 +606,6 @@ class Data implements DataInterface
         // return $this->getData($offset);
         return $this->offsetExists($offset) ? $this->_data[$offset] : null;
     }
-    
-    /**
-     * Get number of items in collection
-     *
-     * @return int
-     */
-    public function count()
-    {
-        return count($this->_data);
-    }
 
     /*************************************
      * IteratorAggregate interface

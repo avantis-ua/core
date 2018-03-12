@@ -39,7 +39,7 @@ class ModelApi extends Model implements ModelInterface
     public function getApi($public_key)
     {
         // Отдаем роутеру RouterDb конфигурацию
-        $this->routerDb->setConfig([], 'Apis');
+        $this->routerDb->setConfig([], 'Pllano', 'Apis');
         // Пингуем для ресурса указанную и доступную базу данных
         $this->_database = $this->routerDb->ping($this->_table);
         // Подключаемся к БД через выбранный Adapter: Sql, Pdo или Apis (По умолчанию Pdo)
@@ -61,7 +61,7 @@ class ModelApi extends Model implements ModelInterface
     public function getKeyId($seller_id)
     {
         // Отдаем роутеру RouterDb конфигурацию
-        $this->routerDb->setConfig([], 'Apis');
+        $this->routerDb->setConfig([], 'Pllano', 'Apis');
         // Пингуем для ресурса указанную и доступную базу данных
         $this->_database = $this->routerDb->ping($this->_table);
         // Подключаемся к БД через выбранный Adapter: Sql, Pdo или Apis (По умолчанию Pdo)

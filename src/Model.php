@@ -15,10 +15,9 @@ use Pllano\Core\Data;
 
 class Model extends Data implements ModelInterface
 {
-
-    protected $app;
+    protected $db;
+	protected $app;
     protected $data;
-
     protected $config = [];
     protected $time_start;
     protected $package = [];
@@ -28,19 +27,16 @@ class Model extends Data implements ModelInterface
     protected $template;
     protected $view;
     protected $cache;
-
     protected $siteId = 1;
-
     protected $pdo;
     protected $slim_pdo;
     protected $routerDb;
-
-    protected $db;
-    protected $_adapter = 'Apis'; // Pdo
-    protected $_driver = '';
-    protected $_database = 'mysql';
-    protected $_table = 'abstract';
-    protected $_resource = 'abstract';
+	protected $_adapter = 'Json'; // Mysql, Pllano, Elasticsearch, Json
+	protected $_driver = 'Apis'; // Apis, Pdo and VendorName
+	protected $_format = 'Default'; // Default=Array, Object, Apis
+    protected $_database;
+    protected $_table;
+    protected $_resource;
     protected $_idField = 'id';
     protected $_fieldMap = [];
     protected $_lastQuery = null;
@@ -50,7 +46,22 @@ class Model extends Data implements ModelInterface
         $this->app = $app;
         $this->data = new Data([]);
         $this->config = $this->app->get('config');
-        $this->connectDatabases();
+		if (isset($this->_table)) {
+            $this->connectDatabases();
+			// print("<br>class Model construct: {$this->_database} - {$this->_table} - {$this->_driver} - {$this->_adapter} - {$this->_format}<br>");
+		}
+    }
+
+    public function connectDatabases()
+    {
+        $this->_routerDb = $this->app->get('routerDb');
+		$this->_database = $this->_routerDb->ping($this->_table);
+		$resource = $this->config['db']['resource'][$this->_database] ?? null;
+		$this->_driver = $resource['driver'] ?? null;
+		$this->_adapter = $resource['adapter'] ?? null;
+		$this->_format = $resource['format'] ?? null;
+        $this->_routerDb->setConfig([], $this->_driver, $this->_adapter, $this->_format);
+        $this->db = $this->_routerDb->run($this->_database);
     }
 
     public function connectContainer()
@@ -66,14 +77,6 @@ class Model extends Data implements ModelInterface
         $this->siteId = $this->app->get('siteId');
     }
 
-    public function connectDatabases()
-    {
-        $this->routerDb = $this->app->get('routerDb');
-        $this->routerDb->setConfig($this->config, $this->_adapter, $this->_driver);
-        $this->database = $this->routerDb->ping($this->_table);
-        $this->db = $this->routerDb->run($this->database);
-    }
-
     public function connectPdo()
     {
         $this->pdo = $this->app->get('pdo');
@@ -84,54 +87,131 @@ class Model extends Data implements ModelInterface
         $this->slim_pdo = $this->app->get('slim_pdo');
     }
 
-    public function last_id(string $resource = null, string $field_id = null): int
+    public function lastId(string $resource = null): int
     {
-        return (int)$this->db->last_id($resource, $field_id);
+        return (int)$this->db->lastId($resource);
     }
 
-    public function select()
+    public function getIdByAlias(string $alias = null): int
     {
-        return $this->db->select()->from($this->_table);
+        if (isset($alias)) {
+			// Database GET
+		    $this->data = $this->db->get($this->_table, ["alias" => $alias, "state" => 1]);
+			$id = $this->data['id'] ?? null;
+            return (int)$id;
+		} else {
+		    return 0;
+		}
     }
 
-    public function query($query)
+    public function getList($filters = null, $joinTables = null, $orderBy = null, $limit = null, $offset = null)
     {
-        return $this->select()->query($query)->fetchAll();
-    }
+		$r = [];
+		$query = [];
+		if($joinTables !== null) {
+			throw new Exception("::joinTables not implemented yet!");
+		}
+		if($filters !== null) {
+			if(is_array($filters)) {
+				foreach ($filters as $filterKey => $filterValue)
+				{
+					$query[$filterKey] = $filterValue;
+				}
+			} else {
+				throw new Exception("::filters must be an array!");
+			}
+		}
+		if ($orderBy !== null) {
+			if (is_array($orderBy)) {
+				foreach($orderBy AS $k => $v) 
+				{
+					$query['order'] = $k;
+					$query['sort'] = $v;
+				}
+			} else {
+			    $query['order'] = $orderBy;
+			}
+		}
+		if ($offset !== null) {
+			$query['offset'] = $offset;
+		}
+		if($limit !== null ) {
+			$query['limit'] = $count;	
+		}
 
-    public function getList(array $filters = [], $joinTables = null, $orderBy = null, $count = null, $offset = null)
-    {
-        return $this->db->getList($filters, $joinTables, $orderBy, $count, $offset);
+		// Database GET
+		$rows = $this->db->get($this->_table, $query, null, $this->_idField);
+
+        if (is_array($rows)) {
+            foreach($rows as $row)
+            {
+                $class = get_class($this);
+                $model = new $class();
+                $model->setTable($this->_table);
+                $model->fromArray($row);
+                $r[] = $model;
+            }
+        }
+        return $r;
     }
 
     public function getOne($id = null)
     {
-        return $this->db->getOne($id);
-    }
-
-    public function getIdByAlias(string $alias): int
-    {
-        $this->data = $this->db->get($this->_table, ["alias" => $alias, "state" => 1]);
-        if($this->data) {
-            return $this->data['id'];
-        } else {
-            return 0;
-        }
+        $r = false;
+		$query = [];
+		$rows = [];
+		if ($id !== null) {
+			if (is_array($id)) {
+			    foreach($id as $filterKey => $filterValue)
+			    {
+				    $query[$filterKey] = $filterValue;
+			    }
+				$rows = $this->db->get($this->_table, $query, null, $this->_idField);
+			} else {
+				$rows = $this->db->get($this->_table, [], (int)$id, $this->_idField);
+				$this->setId((int)$id);
+			}
+		} elseif ($this->hasId()) {
+		    $id = $this->getId();
+			$rows = $this->db->get($this->_table, [], (int)$id, $this->_idField);
+		} else {
+		    return $r;
+		}
+		if (is_array($rows)) {
+			if (isset($rows[0])) {
+				$this->fromArray($rows[0]);
+				$r = true;
+			}
+		}
+        return $r;
     }
 
     public function save()
     {
-        return $this->db->save();
+        $this->data['modified'] = today_date();
+        $this->data['visited'] = today_date();
+        if(!$this->hasId()) {
+            $this->data['created'] = today_date();
+			$id = $this->db->post($this->_table, $this->toArray());
+            $this->setId($id);
+            return $this->getId();
+        } else {
+		    if ($this->hasId()) {
+		        $this->db->put($this->_table, $this->toArray(), $this->getId(), $this->_idField);
+			}
+            return null;
+        }
     }
 
     public function delete()
     {
-        $this->db->delete();
+        $this->db->delete($this->_table, [], $this->getId());
+		$this->clearDataAll();
     }
 
-    public function counts($table, $whereState)
+    public function count($table, $whereState)
     {
-        $this->db->counts($table, $whereState);
+        return $this->db->count($table, $whereState);
     }
 
     public function getFieldMap($table = null)
@@ -166,7 +246,7 @@ class Model extends Data implements ModelInterface
             if($this->_idField === null) {
                 $this->_idField = "id";
             }
-            if($this->_table !== 'abstract' && ) {
+            if($this->_table !== 'abstract') {
                 $this->_fieldMap = $this->db->fieldMap($this->_table);
             }
         }
@@ -182,166 +262,17 @@ class Model extends Data implements ModelInterface
         return $this->_idField;
     }
 
-    public function setIdField($fieldName = null)
+    public function setIdField($idField = null)
     {
-        if(isset($fieldName)) {
-            $this->_idField = $fieldName;
+        if(isset($idField)) {
+            $this->_idField = $idField;
         }
-    }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    static public function selectDate($minutes = null)
-    {
-        if (isset($this->_adapter == 'Pdo')) {
-            return $this->db::selectDate($minutes);
-        } else {
-            return null;
-        }
-    }
-
-
-    public function counts($table, $whereState)
-    {
-        $select = 'SELECT COUNT(*) AS `num` FROM `'.$table.'` WHERE '. $whereState;
-        $row = $this->db->query($select)->fetch();
-        return $row['num'];
-    }
-    
-    public function getList(array $filters = [], $joinTables = null, $orderBy = null, $count = null, $offset = null)
-    {
-        // Нужно тестить
-        $r = [];
-        $select = $this->select();
-        if (isset($joinTables)) {
-            throw new \Exception("::joinTables not implemented yet!");
-        }
-        if (isset($filters)) {
-            if(is_array($filters)) {
-                foreach($filters as $filterKey => $filterValue)
-                {
-                    $select->where($filterKey, $filterValue);
-                }
-            } else {
-                throw new \Exception("::filters must be an array!");
-            }
-        }
-        if (isset($orderBy)) {
-            if(is_array($orderBy)) {
-                foreach($orderBy AS $k => $v)
-                {
-                    $select->order("{$k} {$v}");
-                }
-            } else {
-                $select = $select->order($orderBy);
-            }
-        }
-        if (isset($count)) {
-            if($offset !== null) {
-                $select = $select->limit($count, $offset);
-            } else {
-                $select = $select->limit($count);
-            }
-        }
-
-        $this->_lastQuery = $select->__toString();
-        $rows = $this->query($select)->fetchAll();
-
-        if(is_array($rows)) {
-            foreach($rows as $row)
-            {
-                $class = get_class($this);
-                $model = new $class();
-                $model->setTable($this->_table);
-                $model->fromArray($row);
-                $r[] = $model;
-            }
-        }
-        return $r;
-    }
-
-    public function getOne($id = null) 
-    {
-        // Если аргумент === массив, работаем со свободным WHERE-AND!
-        // Нужно тестить
-        $select = $this->select();
-        if (isset($id)) {
-            if(is_array($id)) {
-                foreach($id as $filterKey => $filterValue)
-                {
-                    $select->where($filterKey, $filterValue);
-                }
-            } else {
-                $select->where($this->_idField, '=', intval($id));
-            }
-        } elseif($this->hasId()) {
-            $id = $this->getId(); // если не обозначен аргумент, берем из данных модели
-        } else {
-            return false; // throw new Exception(__METHOD__ . " : not ID#");
-        }
-
-        //$this->_lastQuery = $select->__toString();
-
-        $rows = $this->query($select)->fetchAll(PDO::FETCH_ASSOC);
-
-        $r = false;
-        if(is_array($rows)) {
-            if(count($rows) > 0) {
-                $this->fromArray($rows[0]);
-                $r = true;
-            }
-        }
-        return $r;
-    }
-
-    public function getIdByAlias($alias)
-    {
-        $query = [
-            "alias" => $alias,
-            "site_id" => $this->siteId
-        ];
-        $id = null;
-        $this->data = $this->get($this->_table, $query, $id, $this->_idField);
-        return $this->data['id'] ?? null;
-    }
-
-    public function save()
-    {
-        $current_date = $this->selectDate();
-        $this->data['modified'] = $current_date;
-        $this->data['visited'] = $current_date;
-        if(!$this->hasId())
-        {
-            $this->data['created'] = $current_date;
-
-            $this->insert($this->toArray());
-            
-            $this->setId($this->lastInsertId());
-            
-            return $this->getId();
-        } else {
-            $where = $this->quoteInto($this->_idField." = ?", $this->getId());
-            $rows_affected = $this->update($this->toArray(), $where);
-            return null;
-        }
-    }
-
-    public function delete()
-    {
-        if(!$this->hasId()) throw new \Exception("::Trying to remove nonexistent property!");
-        $this->delete()
-                 ->from($this->_table)
-                 ->where($this->_idField, '=', $this->getId());
     }
 
     protected function _buildSelectQuery()
     {
-        // Строим запрос для списка или выборки одного объекта
-        $this->connectDatabases();
-        return $this->db->select()->from($this->_table);
+        return null;
     }
-
-
 
 }
  

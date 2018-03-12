@@ -16,32 +16,46 @@ class ModelLanguage
     private $language = "en";
     private $cacheLifetime = 30*24*60*60;
     private $cache;
-    private $routerDb;
+	private $session;
+
+    private $db;
+    private $_routerDb;
     private $_database;
     private $_table;
-    private $db;
-    private $session;
+	private $_idField;
+	private $_driver;
+	private $_adapter;
+	private $_format;
 
     public function __construct($config, $routerDb, $cache, $session)
     {
         $this->config = $config;
         $this->cache = $cache;
         $this->session = $session;
-        $this->routerDb = $routerDb;
         $this->_table = 'language';
-        //$this->_idField = "language_id";
-        //$this->_adapter = 'Pdo';
-        //$this->db->setAdapter($this->_adapter);
-        //$this->connectDatabases();
+		$this->_routerDb = $routerDb;
+		$this->_database = $this->_routerDb->ping($this->_table);
+		if (isset($this->config['db']['resource'][$this->_database])) {
+			$configDatabase = $this->config['db']['resource'][$this->_database];
+		    if (isset($configDatabase['driver'])) {
+			    $this->_driver = $configDatabase['driver'];
+		    }
+		    if (isset($configDatabase['adapter'])) {
+			    $this->_adapter = $configDatabase['adapter'];
+		    }
+		    if (isset($configDatabase['format'])) {
+			    $this->_format = $configDatabase['format'];
+		    }
+		}
+        $this->_routerDb->setConfig([], $this->_driver, $this->_adapter, $this->_format);
+        $this->db = $this->_routerDb->run($this->_database);
     }
 
-    // Ресурс language доступен только на чтение
     public function get(Request $request)
     {
         $getParams = $request->getQueryParams();
-        // Подключаем определение языка в браузере
         $langs = new $this->config['vendor']['detector']['language']();
-        // Получаем массив данных из таблицы language на языке из $this->session->language
+		$this->language = 'ru';
         if (isset($getParams['lang'])) {
             if ($getParams['lang'] == "ru" || $getParams['lang'] == "ua" || $getParams['lang'] == "en" || $getParams['lang'] == "de") {
                 $this->language = $getParams['lang'];
@@ -55,50 +69,30 @@ class ModelLanguage
             $this->language = $this->session->language;
         } elseif ($langs->getLanguage()) {
             $this->language = $langs->getLanguage();
-        } else {
+        } elseif ($this->config['settings']['language']) {
             $this->language = $this->config['settings']['language'];
         }
 
         $host = $request->getUri()->getHost();
-
         $return = [];
-
         if ($this->cache->run($host.'/'.$this->_table.'/'.$this->language, $this->cacheLifetime) === null) {
-
-            $responseArr = [];
-            // Отдаем роутеру RouterDb конфигурацию
-            $this->routerDb->setConfig([], 'Apis');
-            // Пингуем для ресурса указанную и доступную базу данных
-            $this->_database = $this->routerDb->ping($this->_table);
-            // Подключаемся к БД через выбранный Adapter: Sql, Pdo или Apis (По умолчанию Pdo)
-            $this->db = $this->routerDb->run($this->_database);
-            // Отправляем запрос к БД в формате адаптера. В этом случае Apis
-            $responseArr = $this->db->get($this->_table);
-
-            if ($responseArr != null) {
-                $arr = [];
-                foreach($responseArr['body']['items'] as $value)
+            // Database GET
+            $responseArr = $this->db->get($this->_table) ?? [];
+            $arr = [];
+            if (isset($responseArr)) {
+                foreach ($responseArr as $value)
                 {
-                    $array = (array)$value['item'];
-                    $arr[$array["id"]] = $array[$this->language];
+                    $arr[$value['id']] = $value[$this->language];
                 }
                 if ($this->cache->state() == 1) {
                     $this->cache->set($arr);
                 }
-
-                $return = $arr;
- 
-            } else {
-                $return = $this->cache->get();
             }
+            $return = $arr;
         } else {
             $return = $this->cache->get();
         }
-        
-        
-        
         return $return;
- 
     }
 
     public function lang()

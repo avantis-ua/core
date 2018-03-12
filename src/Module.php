@@ -23,11 +23,11 @@ class Module extends Model implements ModuleInterface
 
     public function __construct(Container $app, string $route = null, string $block = null, string $modulKey = null, array $modulVal = [])
     {
-        parent::__construct($app);
         $this->block = $block;
         $this->route = $route;
         $this->modulKey = $modulKey;
         $this->modulVal = $modulVal;
+		parent::__construct($app);
     }
 
     public function get(Request $request){}

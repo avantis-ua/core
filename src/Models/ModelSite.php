@@ -12,21 +12,22 @@ namespace Pllano\Core\Models;
 use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Pllano\Interfaces\ModelInterface;
-use Pllano\Core\Model;
+use Pllano\Core\{Model, Data};
 
 class ModelSite extends Model implements ModelInterface
 {
 
-    protected $templates;
+    private $site;
+	private $templates;
     private $cache_lifetime = 30*24*60*60;
 
     public function __construct(Container $app)
     {
-        parent::__construct($app);
-        $this->connectContainer();
-        $this->connectDatabases();
-        $this->_table = 'site';
+		$this->_table = 'site';
         $this->_idField = 'site_id';
+		$this->site = new Data([]);
+		parent::__construct($app);
+        $this->connectContainer();
         $this->templates = $this->config["template"]["front_end"]["themes"]["template"];
     }
 
@@ -34,29 +35,20 @@ class ModelSite extends Model implements ModelInterface
     {
         $cache_run = $this->cache->run($this->_table, $this->cache_lifetime);
         if ($cache_run === null) {
-
-            $responseArr = [];
-            // Отдаем роутеру RouterDb конфигурацию
-            $this->routerDb->setConfig([], 'Apis');
-            // Пингуем для ресурса указанную и доступную базу данных
-            $this->_database = $this->routerDb->ping($this->_table);
-            // Подключаемся к БД через выбранный Adapter: Sql, Pdo или Apis (По умолчанию Pdo)
-            $this->db = $this->routerDb->run($this->_database);
-            // Отправляем запрос к БД в формате адаптера. В этом случае Apis
+			// Database GET
             $responseArr = $this->db->get($this->_table);
-
-            if(isset($responseArr["body"]["items"]["0"]["item"])) {
-                if ($responseArr != null) {
-                    $this->data = $responseArr["body"]["items"]["0"]["item"];
-                }
+			if(is_object($responseArr)) {
+                $responseArr = (array)$responseArr;
+            }
+            if(isset($responseArr['0'])) {
+                    $this->data = $responseArr['0'];
             }
             if ($this->cache->state() == 1) {
                 $this->cache->set($this->data);
             }
             return $this->data;
-
         } else {
-             return $this->cache->get();
+            return $this->cache->get();
         }
     }
     

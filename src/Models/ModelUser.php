@@ -23,15 +23,12 @@ class ModelUser extends Model implements ModelInterface, UserInterface
     
     public function __construct(Container $app)
     {
-        parent::__construct($app);
-        $this->user = new Data([]);
-        $this->connectContainer();
-        $this->connectDatabases();
-        $this->_table = 'user';
+		$this->_table = 'user';
         $this->_idField = 'id';
+		$this->user = new Data([]);
+		parent::__construct($app);
+        $this->connectContainer();
         $this->modules = $this->app->get('modules');
-        // $this->_adapter = 'Pdo';
-        // $this->db->setAdapter($this->_adapter);
     }
 
     // Запускаем сессию пользоваетеля
@@ -50,32 +47,17 @@ class ModelUser extends Model implements ModelInterface, UserInterface
             } catch (\Exception $ex) {
                 $cookie = null;
             }
-
             if ($cookie != null) {
-                
-                $responseArr = [];
-                // Отдаем роутеру RouterDb конфигурацию
-                $this->routerDb->setConfig([], 'Apis');
-                // Пингуем для ресурса указанную и доступную базу данных
-                $this->_database = $this->routerDb->ping($this->_table);
-                // Подключаемся к БД через выбранный Adapter: Sql, Pdo или Apis (По умолчанию Pdo)
-                $this->db = $this->routerDb->run($this->_database);
-                // Массив для запроса
                 $query = [
                     "cookie" => $cookie, 
                     "state" => 1
                 ];
-                // Отправляем запрос к БД в формате адаптера. В этом случае Apis
+				// Database GET
                 $responseArr = $this->db->get($this->_table, $query);
-
-                //print("<br>");
-                //print_r($responseArr);
-                if (isset($responseArr["headers"]["code"]) && (int)$responseArr["headers"]["code"] == 200) {
-                        if(is_object($responseArr["body"]["items"]["0"]["item"])) {
-                            $this->user = (array)$responseArr["body"]["items"]["0"]["item"];
-                        } elseif (is_array($responseArr["body"]["items"]["0"]["item"])) {
-                            $this->user = $responseArr["body"]["items"]["0"]["item"];
-                        }
+                if (isset($responseArr['0'])) {
+                    if(is_object($responseArr['0'])) {
+                        $this->user = (array)$responseArr['0'];
+                    }
 
                         if ($this->user['state'] == 1) {
                             $this->session->authorize = 1;
@@ -134,23 +116,15 @@ class ModelUser extends Model implements ModelInterface, UserInterface
     // Авторизвация
     public function checkLogin($email, $phone, $password)
     {
-        $responseArr = [];
-        // Отдаем роутеру RouterDb конфигурацию
-        $this->routerDb->setConfig([], 'Apis');
-        // Пингуем для ресурса указанную и доступную базу данных
-        $this->_database = $this->routerDb->ping($this->_table);
-        // Подключаемся к БД через выбранный Adapter: Sql, Pdo или Apis (По умолчанию Pdo)
-        $this->db = $this->routerDb->run($this->_database);
-        // Массив для запроса
         $query = [
             "phone" => $phone, 
             "email" => $email
         ];
-        // Отправляем запрос к БД в формате адаптера. В этом случае Apis
-        $responseArr = $this->db->get($this->_table, $query);
+		// Database GET
+        $responseArr = $this->db->get($this->_table, $query) ?? [];
 
-        if (isset($responseArr["headers"]["code"])) {
-            $this->user = (array)$responseArr["body"]["items"]["0"]["item"];
+        if (isset($responseArr)) {
+            $this->user = (array)$responseArr["0"];
             // Если все ок читаем пароль
             if (password_verify($password, $this->user["password"])) {
                 // Если все ок - отдаем user_id
@@ -172,40 +146,26 @@ class ModelUser extends Model implements ModelInterface, UserInterface
         // Генерируем новый cookie
         $cookie = random_token();
 
-        $responseArr = [];
-        // Отдаем роутеру RouterDb конфигурацию
-        $this->routerDb->setConfig([], 'Apis');
-        // Пингуем для ресурса указанную и доступную базу данных
-        $this->_database = $this->routerDb->ping($this->_table);
-        // Подключаемся к БД через выбранный Adapter: Sql, Pdo или Apis (По умолчанию Pdo)
-        $this->db = $this->routerDb->run($this->_database);
-        // Массив c запросом
         $query = [
             "cookie" => $cookie, 
             "authorized" => today()
         ];
-        // Отправляем запрос к БД в формате адаптера. В этом случае Apis
-        $responseArr = $this->db->put($this->_table, $query, $user_id);
+		// Database PUT
+        $responseArr = $this->db->put($this->_table, $query, $user_id) ?? [];
 
         // Если удалось обновить cookie в базе перезапишем везде
-        if (isset($responseArr["headers"]["code"])) {
-            if ($responseArr["headers"]["code"] == 202 || $responseArr["headers"]["code"] == "202") {
-                // Читаем ключи шифрования
-                $cookie_key = $this->config['key']['cookie'];
-                $crypt = $this->config['vendor']['crypto']['crypt'];
-                // Шифруем cookie
-                $new_cookie = $crypt::encrypt($cookie, $cookie_key);
-                // Перезаписываем cookie в сессии
-                $this->session->cookie = $new_cookie;
-                // Перезаписываем cookie в базе
-                set_cookie($session_name, $new_cookie, 60*60*24*365);
-                // Если все ок возвращаем 1
-                return 1;
- 
-            } else {
-                return null;
-            }
- 
+        if (isset($responseArr)) {
+            // Читаем ключи шифрования
+            $cookie_key = $this->config['key']['cookie'];
+            $crypt = $this->config['vendor']['crypto']['crypt'];
+            // Шифруем cookie
+            $new_cookie = $crypt::encrypt($cookie, $cookie_key);
+            // Перезаписываем cookie в сессии
+            $this->session->cookie = $new_cookie;
+            // Перезаписываем cookie в базе
+            set_cookie($session_name, $new_cookie, 60*60*24*365);
+            // Если все ок возвращаем 1
+            return 1;
         } else {
             // Если не удалось перезаписать в базе
             return null;
@@ -215,33 +175,18 @@ class ModelUser extends Model implements ModelInterface, UserInterface
     // Проверяем наличие пользователя по email и phone
     public function getEmailPhone($email, $phone)
     {
-        $responseArr = [];
-        // Отдаем роутеру RouterDb конфигурацию
-        $this->routerDb->setConfig([], 'Apis');
-        // Пингуем для ресурса указанную и доступную базу данных
-        $this->_database = $this->routerDb->ping($this->_table);
-        // Подключаемся к БД через выбранный Adapter: Sql, Pdo или Apis (По умолчанию Pdo)
-        $this->db = $this->routerDb->run($this->_database);
-        // Массив c запросом
-        $query["email"] = $email;
+        $r = null;
+		$query["email"] = $email;
         $query["phone"] = $phone;
-        // Отправляем запрос к БД в формате адаптера. В этом случае Apis
-        $responseArr = $this->db->get($this->_table, $query);
-
-        if (isset($responseArr["headers"]["code"])) {
-            if ($responseArr["headers"]["code"] == 200 || $responseArr["headers"]["code"] == "200") {
-                $item = (array)$responseArr["body"]["items"]["0"]["item"];
-                if(isset($item["user_id"])){
-                    return $item["user_id"];
-                } else {
-                    return null;
-                }
-            } else {
-                return null;
+		// Database GET
+        $responseArr = $this->db->get($this->_table, $query) ?? [];
+        if (isset($responseArr)) {
+            $item = (array)$responseArr["0"];
+            if(isset($item["user_id"])){
+                    $r = $item["user_id"];
             }
-        } else {
-            return null;
         }
+		return $r;
     }
 
     // Выйти

@@ -13,11 +13,10 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class ModelLanguage
 {
-    private $language = "en";
+    private $language = "ru";
     private $cacheLifetime = 30*24*60*60;
     private $cache;
 	private $session;
-
     private $db;
     private $_routerDb;
     private $_database;
@@ -29,33 +28,18 @@ class ModelLanguage
 
     public function __construct($config, $routerDb, $cache, $session)
     {
-        $this->config = $config;
+        $this->_table = 'language';
+		$this->config = $config;
         $this->cache = $cache;
         $this->session = $session;
-        $this->_table = 'language';
 		$this->_routerDb = $routerDb;
-		$this->_database = $this->_routerDb->ping($this->_table);
-		if (isset($this->config['db']['resource'][$this->_database])) {
-			$configDatabase = $this->config['db']['resource'][$this->_database];
-		    if (isset($configDatabase['driver'])) {
-			    $this->_driver = $configDatabase['driver'];
-		    }
-		    if (isset($configDatabase['adapter'])) {
-			    $this->_adapter = $configDatabase['adapter'];
-		    }
-		    if (isset($configDatabase['format'])) {
-			    $this->_format = $configDatabase['format'];
-		    }
-		}
-        $this->_routerDb->setConfig([], $this->_driver, $this->_adapter, $this->_format);
-        $this->db = $this->_routerDb->run($this->_database);
     }
 
     public function get(Request $request)
     {
-        $getParams = $request->getQueryParams();
+        $return = null;
+		$getParams = $request->getQueryParams();
         $langs = new $this->config['vendor']['detector']['language']();
-		$this->language = 'ru';
         if (isset($getParams['lang'])) {
             if ($getParams['lang'] == "ru" || $getParams['lang'] == "ua" || $getParams['lang'] == "en" || $getParams['lang'] == "de") {
                 $this->language = $getParams['lang'];
@@ -67,21 +51,31 @@ class ModelLanguage
             }
         } elseif (isset($this->session->language)) {
             $this->language = $this->session->language;
-        } elseif ($langs->getLanguage()) {
+        } elseif ($langs->getLanguage() != null) {
             $this->language = $langs->getLanguage();
-        } elseif ($this->config['settings']['language']) {
+        } elseif (isset($this->config['settings']['language'])) {
             $this->language = $this->config['settings']['language'];
         }
 
-        $host = $request->getUri()->getHost();
-        $return = [];
+        $host = $request->getUri()->getHost() ?? 'site';
+        
         if ($this->cache->run($host.'/'.$this->_table.'/'.$this->language, $this->cacheLifetime) === null) {
+            $this->_database = $this->_routerDb->ping($this->_table);
+            $resource = $this->config['db']['resource'][$this->_database] ?? null;
+            $this->_driver = $resource['driver'] ?? null;
+            $this->_adapter = $resource['adapter'] ?? null;
+            $this->_format = $resource['format'] ?? null;
+            $this->_routerDb->setConfig([], $this->_driver, $this->_adapter, $this->_format);
+            $this->db = $this->_routerDb->run($this->_database);
             // Database GET
             $responseArr = $this->db->get($this->_table) ?? [];
             $arr = [];
             if (isset($responseArr)) {
                 foreach ($responseArr as $value)
                 {
+					if(is_object($value)) {
+                        $value = (array)$value;
+                    }
                     $arr[$value['id']] = $value[$this->language];
                 }
                 if ($this->cache->state() == 1) {

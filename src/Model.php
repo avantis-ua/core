@@ -55,13 +55,15 @@ class Model extends Data implements ModelInterface
     public function connectDatabases()
     {
         $this->_routerDb = $this->app->get('routerDb');
-		$this->_database = $this->_routerDb->ping($this->_table);
-		$resource = $this->config['db']['resource'][$this->_database] ?? null;
-		$this->_driver = $resource['driver'] ?? null;
-		$this->_adapter = $resource['adapter'] ?? null;
-		$this->_format = $resource['format'] ?? null;
-        $this->_routerDb->setConfig([], $this->_driver, $this->_adapter, $this->_format);
-        $this->db = $this->_routerDb->run($this->_database);
+        if (isset($this->_table)) {
+            $this->_database = $this->_routerDb->ping($this->_table);
+            $resource = $this->config['db']['resource'][$this->_database] ?? null;
+            $this->_driver = $resource['driver'] ?? null;
+            $this->_adapter = $resource['adapter'] ?? null;
+            $this->_format = $resource['format'] ?? null;
+            $this->_routerDb->setConfig([], $this->_driver, $this->_adapter, $this->_format);
+            $this->db = $this->_routerDb->run($this->_database);
+        }
     }
 
     public function connectContainer()

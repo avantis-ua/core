@@ -39,7 +39,7 @@ class Controllers extends Controller implements ControllerInterface
         // true - Если все хуки отказались подменять контент
         if($hook->state() === true) {
             
-            //$defaultData = new PluginDefaultData($request, $this->route);
+            // $defaultData = new PluginDefaultData($request, $this->route);
 
             $host = $request->getUri()->getHost();
             $path = '';
@@ -194,7 +194,7 @@ class Controllers extends Controller implements ControllerInterface
         $response->withStatus(200);
         $response->withHeader('Content-type', 'application/json');
 
-        $csrf = new PluginCsrf($this->core);
+        $csrf = new PluginCsrf($this->app);
         if ($csrf->check($request, $response, $args) === true) {
 
             $mods = explode(',', str_replace([" ", "'"], "", $this->config['routers']['site'][$this->route]['blocks']));
@@ -323,7 +323,7 @@ class Controllers extends Controller implements ControllerInterface
         $response->withStatus(200);
         $response->withHeader('Content-type', 'application/json');
 
-        $csrf = new PluginCsrf($this->core);
+        $csrf = new PluginCsrf($this->app);
         if ($csrf->check($request, $response, $args) === true) {
             $id = intval(sanitize($post['id']));
             if ($id) {

@@ -52,8 +52,10 @@ class ModelUser extends Model implements ModelInterface, UserInterface
                     "cookie" => $cookie, 
                     "state" => 1
                 ];
+
 				// Database GET
                 $responseArr = $this->db->get($this->_table, $query);
+
                 if (isset($responseArr['0'])) {
                     if(is_object($responseArr['0'])) {
                         $this->user = (array)$responseArr['0'];
@@ -120,6 +122,7 @@ class ModelUser extends Model implements ModelInterface, UserInterface
             "phone" => $phone, 
             "email" => $email
         ];
+
 		// Database GET
         $responseArr = $this->db->get($this->_table, $query) ?? [];
 
@@ -150,6 +153,7 @@ class ModelUser extends Model implements ModelInterface, UserInterface
             "cookie" => $cookie, 
             "authorized" => today()
         ];
+
 		// Database PUT
         $responseArr = $this->db->put($this->_table, $query, $user_id) ?? [];
 
@@ -178,8 +182,10 @@ class ModelUser extends Model implements ModelInterface, UserInterface
         $r = null;
 		$query["email"] = $email;
         $query["phone"] = $phone;
+
 		// Database GET
         $responseArr = $this->db->get($this->_table, $query) ?? [];
+
         if (isset($responseArr)) {
             $item = (array)$responseArr["0"];
             if(isset($item["user_id"])){

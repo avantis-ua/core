@@ -52,24 +52,22 @@ class AdminIndex extends Model implements ModelInterface
                    }
                 }
             } else {
-            
-                // Отдаем роутеру RouterDb конфигурацию
-                $routerDb = new RouterDb($this->config, 'Apis');
-                // Пингуем для ресурса указанную и доступную базу данных
-                // Подключаемся к БД через выбранный Adapter: Sql, Pdo или Apis (По умолчанию Pdo)
-                $db = $routerDb->run($routerDb->ping($resource));
-                // Массив для запроса
+			    $this->_table = $resource;
+			    $this->_routerDb = $this->app->get('routerDb');
+			    $this->_database = $this->_routerDb->ping($this->_table);
+			    $resourceConfig = $this->config['db']['resource'][$this->_database] ?? null;
+			    $this->_driver = $resourceConfig['driver'] ?? null;
+			    $this->_adapter = $resourceConfig['adapter'] ?? null;
+			    $this->_format = $resourceConfig['format'] ?? null;
+			    $this->_routerDb->setConfig([], $this->_driver, $this->_adapter, $this->_format);
+			    $this->db = $this->_routerDb->run($this->_database);
                 $query = [
                     "offset" => 0,
                     "limit" => 5,
                     "sort" => "id",
                     "order" => "DESC"
                 ];
-                // Отправляем запрос к БД в формате адаптера. В этом случае Apis
-                $responseArr = $db->get($resource, $query);
-
-                // Убираем body items
-                $resp[$resource] = $responseArr['body']['items'];
+                $resp[$resource] = $this->db->get($resource, $query);
             }
         }
 

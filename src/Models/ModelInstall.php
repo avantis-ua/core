@@ -14,14 +14,14 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Pllano\Interfaces\ModelInterface;
 use Pllano\Core\{Model, Data};
 
-class ModelAreaCity extends Model implements ModelInterface
+class ModelInstall extends Model implements ModelInterface
 {
 
     public function __construct(Container $app)
     {
-        parent::__construct($app);
-        // $this->connectContainer();
-        $this->connectDatabases();
+        $this->app = $app;
+		parent::__construct($this->app);
+		$this->_routerDb = $this->app->get('routerDb');
     }
 
     public function stores_list()
@@ -29,12 +29,9 @@ class ModelAreaCity extends Model implements ModelInterface
         $responseArr = [];
         // Ресурс к которому обращаемся
         $this->_table = "stores_list";
-        // Отдаем роутеру RouterDb конфигурацию
-        $this->routerDb->setConfig([], 'Pllano', 'Apis');
-        // Пингуем для ресурса указанную и доступную базу данных
-        $this->_database = $this->routerDb->ping($this->_table);
-        // Подключаемся к БД через выбранный Adapter: Sql, Pdo или Apis (По умолчанию Pdo)
-        $this->db = $this->routerDb->run($this->_database);
+		$this->_routerDb->setConfig([], 'Pllano', 'Apis', 'Apis');
+        $this->_database = $this->_routerDb->ping($this->_table);
+        $this->db = $this->_routerDb->run($this->_database);
         // Отправляем запрос к БД в формате адаптера. В этом случае Apis
         $responseArr = $this->db->get($this->_table);
         $this->data = $responseArr["body"]["items"] ?? [];
@@ -46,12 +43,9 @@ class ModelAreaCity extends Model implements ModelInterface
         $responseArr = [];
         // Ресурс к которому обращаемся
         $this->_table = "templates_list";
-        // Отдаем роутеру RouterDb конфигурацию
-        $this->routerDb->setConfig([], 'Pllano', 'Apis');
-        // Пингуем для ресурса указанную и доступную базу данных
-        $this->_database = $this->routerDb->ping($this->_table);
-        // Подключаемся к БД через выбранный Adapter: Sql, Pdo или Apis (По умолчанию Pdo)
-        $this->db = $this->routerDb->run($this->_database);
+		$this->_routerDb->setConfig([], 'Pllano', 'Apis', 'Apis');
+        $this->_database = $this->_routerDb->ping($this->_table);
+        $this->db = $this->_routerDb->run($this->_database);
         // Отправляем запрос к БД в формате адаптера. В этом случае Apis
         if (isset($store)) {
             $responseArr = $this->db->get($this->_table, ["store_id" => $store]);

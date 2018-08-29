@@ -26,33 +26,39 @@ class ModelInstall extends Model implements ModelInterface
 
     public function stores_list()
     {
+		$this->_table = "stores_list";
+		$this->_database = $this->_routerDb->ping($this->_table);
+		$resource = $this->config['db']['resource'][$this->_database] ?? null;
+		$this->_driver = $resource['driver'] ?? null;
+		$this->_adapter = $resource['adapter'] ?? null;
+		$this->_format = $resource['format'] ?? null;
+		$this->_routerDb->setConfig([], $this->_driver, $this->_adapter, $this->_format);
+		$this->db = $this->_routerDb->run($this->_database);
+
         $responseArr = [];
-        // Ресурс к которому обращаемся
-        $this->_table = "stores_list";
-		$this->_routerDb->setConfig([], 'Pllano', 'Apis', 'Apis');
-        $this->_database = $this->_routerDb->ping($this->_table);
-        $this->db = $this->_routerDb->run($this->_database);
-        // Отправляем запрос к БД в формате адаптера. В этом случае Apis
-        $responseArr = $this->db->get($this->_table);
-        $this->data = $responseArr["body"]["items"] ?? [];
+		$responseArr = $this->db->get($this->_table);
+        $this->data = $responseArr ?? [];
         return $this->data;
     }
 
     public function templates_list($store = null)
     {
-        $responseArr = [];
-        // Ресурс к которому обращаемся
         $this->_table = "templates_list";
-		$this->_routerDb->setConfig([], 'Pllano', 'Apis', 'Apis');
-        $this->_database = $this->_routerDb->ping($this->_table);
-        $this->db = $this->_routerDb->run($this->_database);
-        // Отправляем запрос к БД в формате адаптера. В этом случае Apis
+		$this->_database = $this->_routerDb->ping($this->_table);
+		$resource = $this->config['db']['resource'][$this->_database] ?? null;
+		$this->_driver = $resource['driver'] ?? null;
+		$this->_adapter = $resource['adapter'] ?? null;
+		$this->_format = $resource['format'] ?? null;
+		$this->_routerDb->setConfig([], $this->_driver, $this->_adapter, $this->_format);
+		$this->db = $this->_routerDb->run($this->_database);
+		
+		$responseArr = [];
         if (isset($store)) {
             $responseArr = $this->db->get($this->_table, ["store_id" => $store]);
         } else {
             $responseArr = $this->db->get($this->_table);
         }
-        $this->data = $responseArr["body"]["items"] ?? [];
+        $this->data = $responseArr ?? [];
         return $this->data;
     }
 

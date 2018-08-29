@@ -35,7 +35,7 @@ class ModelSessionUser extends Model implements ModelInterface
         // Определяем язык интерфейса пользователя
         $langs = new $this->config['vendor']['detector']['language']();
         // Получаем массив данных из таблицы language на языке из $this->session->language
-        $lang = $this->session->language ?? $langs->getLanguage() ?? $this->config["settings"]["language"] ?? null;
+        $lang = $this->session->language ?? $langs->getLanguage() ?? $this->config["settings"]["language"] ?? 'en';
         $this->session->language = $lang;
 
         if(!isset($this->session->post_id)) {

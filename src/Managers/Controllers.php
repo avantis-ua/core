@@ -107,12 +107,13 @@ class Controllers extends Controller implements ControllerInterface
 
                 // Формируем данные для шаблонизатора. Склеиваем два массива.
                 $this->data = array_replace_recursive($userArr, $dataArr);
-            } else {
+            }
+		    else {
 
                 $sessionTemp = new $this->config['vendor']['session']['session']("_temp");
                 $this->render = "index.html";
                 // Если ключа доступа у нет, значит сайт еще не активирован
-                $content = '';
+                $content = [];
                 if (isset($this->session->install)) {
                     if ($this->session->install == 1) {
                         $this->render = "stores.html";
@@ -130,6 +131,8 @@ class Controllers extends Controller implements ControllerInterface
                         $this->render = "key.html";
                     }
                 }
+				
+				//print_r($content);
 
                 $this->data = [
                     "head" => $head,
@@ -196,7 +199,6 @@ class Controllers extends Controller implements ControllerInterface
 
         $csrf = new PluginCsrf($this->app);
         if ($csrf->check($request, $response, $args) === true) {
-
             $mods = explode(',', str_replace([" ", "'"], "", $this->config['routers']['site'][$this->route]['blocks']));
             foreach($mods as $key => $block)
             {

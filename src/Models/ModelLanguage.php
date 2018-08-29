@@ -33,6 +33,7 @@ class ModelLanguage
         $this->cache = $cache;
         $this->session = $session;
 		$this->_routerDb = $routerDb;
+		$this->language = 'en';
     }
 
     public function get(Request $request)
@@ -60,6 +61,7 @@ class ModelLanguage
         $host = $request->getUri()->getHost() ?? 'site';
         
         if ($this->cache->run($host.'/'.$this->_table.'/'.$this->language, $this->cacheLifetime) === null) {
+
             $this->_database = $this->_routerDb->ping($this->_table);
             $resource = $this->config['db']['resource'][$this->_database] ?? null;
             $this->_driver = $resource['driver'] ?? null;
@@ -101,9 +103,7 @@ class ModelLanguage
 
     public function cacheLifetime($cacheLifetime = null)
     {
-        if (isset($cacheLifetime)) {
-            $this->cacheLifetime = $cacheLifetime;
-        }
+        $this->cacheLifetime = $cacheLifetime ?? null;
     }
 
 }
